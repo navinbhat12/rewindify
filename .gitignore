@@ -1,0 +1,10 @@
+# Ignore raw data files
+backend/data/
+*.json
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore node modules (for React later)
+frontend/node_modules/
