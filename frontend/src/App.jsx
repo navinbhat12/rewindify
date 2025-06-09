@@ -11,6 +11,11 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [allTimeStats, setAllTimeStats] = useState(null);
+  const [metrics, setMetrics] = useState({
+    artists: "time",
+    songs: "time",
+    albums: "time",
+  });
 
   const handleUploadComplete = async (uploadedData) => {
     const formatted = uploadedData
@@ -102,6 +107,10 @@ function App() {
               ))}
           </select>
 
+          <h3 style={{ margin: "0.5rem 0 0.25rem", fontWeight: "normal" }}>
+            {selectedYear} Spotify Listening
+          </h3>
+
           <div
             style={{
               width: "100%",
@@ -117,11 +126,11 @@ function App() {
               values={filteredData}
               onClick={handleDateClick}
               classForValue={(value) => {
-                if (!value || value.count < 300) return "color-white";
+                if (!value || value.count < 120) return "color-white";
                 if (value.count < 1000) return "color-purple-light";
-                if (value.count < 1500) return "color-purple-mid";
-                if (value.count < 3600) return "color-purple-dark";
-                return "color-purple-max";
+                if (value.count < 2200) return "color-purple-mid";
+                if (value.count < 4700) return "color-purple-dark";
+                return "color-max";
               }}
               tooltipDataAttrs={(value) =>
                 value.date
@@ -134,6 +143,15 @@ function App() {
               showWeekdayLabels
             />
           </div>
+          <div className="heatmap-legend">
+            <span>Less</span>
+            <div className="legend-box color-white" />
+            <div className="legend-box color-purple-light" />
+            <div className="legend-box color-purple-mid" />
+            <div className="legend-box color-purple-dark" />
+            <div className="legend-box color-max" />
+            <span>More</span>
+          </div>
         </>
       )}
 
@@ -144,7 +162,13 @@ function App() {
           onClose={() => setSelectedDate(null)}
         />
       )}
-      {allTimeStats && <AllTimeStats data={allTimeStats} />}
+      {allTimeStats && (
+        <AllTimeStats
+          data={allTimeStats}
+          metrics={metrics}
+          setMetrics={setMetrics}
+        />
+      )}
     </div>
   );
 }

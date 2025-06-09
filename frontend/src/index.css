@@ -13,6 +13,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -20,14 +28,6 @@ a {
 }
 a:hover {
   color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -67,6 +67,7 @@ button:focus-visible {
   }
 }
 
+/* 🎨 Heatmap colors */
 .color-white {
   fill: #ffffff;
 }
@@ -79,8 +80,15 @@ button:focus-visible {
 .color-purple-dark {
   fill: #5e00b6;
 }
-.color-purple-max {
-  fill: #2e003e; /* very dark purple, almost black */
+.color-max {
+  fill: #ffd700; /* gold */
+}
+
+.react-calendar-heatmap rect {
+  rx: 2px;
+  ry: 2px;
+  stroke: #1e1e1e; /* background match */
+  stroke-width: 2px;
 }
 
 .react-calendar-heatmap text {
@@ -90,4 +98,41 @@ button:focus-visible {
 
 .react-calendar-heatmap .weekday {
   display: block !important;
+}
+
+/* 📦 Heatmap Legend Styles */
+.heatmap-legend {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #ccc;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: flex-end; /* align to right */
+}
+
+.legend-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #333;
+}
+
+/* 🟨 Explicit backgrounds for legend boxes */
+.legend-box.color-white {
+  background-color: #ffffff;
+}
+.legend-box.color-purple-light {
+  background-color: #d6b3ff;
+}
+.legend-box.color-purple-mid {
+  background-color: #a659ff;
+}
+.legend-box.color-purple-dark {
+  background-color: #5e00b6;
+}
+.legend-box.color-max {
+  background-color: #ffd700;
 }

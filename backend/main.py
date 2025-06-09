@@ -180,34 +180,36 @@ def get_all_time_stats():
             print(f"⚠️ Column {col} not found in parsed_df. Filling with None.")
             parsed_df[col] = None
 
-    # Proceed with grouping
-    top_artists = (
-        parsed_df.groupby("master_metadata_album_artist_name")["ms_played"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-    top_songs = (
-        parsed_df.groupby("master_metadata_track_name")["ms_played"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-    top_albums = (
-        parsed_df.groupby("master_metadata_album_album_name")["ms_played"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
+    # Add play count column
+    parsed_df["play"] = 1
+
+    def top_by(col, metric):
+        return (
+            parsed_df.groupby(col)[metric]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .reset_index()
+            .rename(columns={col: "name", metric: metric})
+            .to_dict(orient="records")
+        )
 
     return {
-        "artists": top_artists.rename(columns={"master_metadata_album_artist_name": "name", "ms_played": "ms_played"}).to_dict(orient="records"),
-        "songs": top_songs.rename(columns={"master_metadata_track_name": "name", "ms_played": "ms_played"}).to_dict(orient="records"),
-        "albums": top_albums.rename(columns={"master_metadata_album_album_name": "name", "ms_played": "ms_played"}).to_dict(orient="records"),
+        "artists": {
+            "time": top_by("master_metadata_album_artist_name", "ms_played"),
+            "count": top_by("master_metadata_album_artist_name", "play"),
+        },
+        "songs": {
+            "time": top_by("master_metadata_track_name", "ms_played"),
+            "count": top_by("master_metadata_track_name", "play"),
+        },
+        "albums": {
+            "time": top_by("master_metadata_album_album_name", "ms_played"),
+            "count": top_by("master_metadata_album_album_name", "play"),
+        },
     }
+
+
 
 
 

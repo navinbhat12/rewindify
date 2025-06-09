@@ -45,3 +45,59 @@
   margin-right: 0.5rem;
   color: #9713c7;
 }
+
+.metric-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-toggle button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #888;
+  background-color: #2a2a2a;
+  color: white;
+  cursor: pointer;
+}
+
+.metric-toggle button.active {
+  background-color: #9713c7;
+  color: white;
+  border-color: #9713c7;
+}
+
+.stat-item .value {
+  float: right;
+  font-weight: 500;
+  color: #ccc;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.metric-toggle button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #888;
+  background-color: #2a2a2a;
+  color: white;
+  cursor: pointer;
+}
+
+.metric-toggle button.active {
+  background-color: #9713c7;
+  color: white;
+  border-color: #9713c7;
+}
