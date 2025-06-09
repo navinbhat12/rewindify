@@ -161,4 +161,55 @@ def get_album_image(
     return {"image_url": None}
 
 
+@app.get("/all_time_stats")
+def get_all_time_stats():
+    global parsed_df
+    if parsed_df is None:
+        raise HTTPException(status_code=400, detail="Data not yet uploaded")
+
+    print("📊 Columns available in parsed_df:", parsed_df.columns.tolist())
+
+    # Fill missing expected columns if they don’t exist
+    required = [
+        "master_metadata_album_artist_name",
+        "master_metadata_track_name",
+        "master_metadata_album_album_name",
+    ]
+    for col in required:
+        if col not in parsed_df.columns:
+            print(f"⚠️ Column {col} not found in parsed_df. Filling with None.")
+            parsed_df[col] = None
+
+    # Proceed with grouping
+    top_artists = (
+        parsed_df.groupby("master_metadata_album_artist_name")["ms_played"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+    top_songs = (
+        parsed_df.groupby("master_metadata_track_name")["ms_played"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+    top_albums = (
+        parsed_df.groupby("master_metadata_album_album_name")["ms_played"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+
+    return {
+        "artists": top_artists.rename(columns={"master_metadata_album_artist_name": "name", "ms_played": "ms_played"}).to_dict(orient="records"),
+        "songs": top_songs.rename(columns={"master_metadata_track_name": "name", "ms_played": "ms_played"}).to_dict(orient="records"),
+        "albums": top_albums.rename(columns={"master_metadata_album_album_name": "name", "ms_played": "ms_played"}).to_dict(orient="records"),
+    }
+
+
+
+
 

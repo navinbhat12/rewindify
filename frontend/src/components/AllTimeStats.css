@@ -1,0 +1,47 @@
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background-color: #2a2a2a;
+  color: white;
+  border-radius: 10px;
+  padding: 1rem;
+  width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 0 10px #00000055;
+}
+
+.stat-card h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #e0e0e0;
+}
+
+.stat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.stat-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #444;
+  font-size: 0.95rem;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.rank {
+  font-weight: bold;
+  margin-right: 0.5rem;
+  color: #9713c7;
+}

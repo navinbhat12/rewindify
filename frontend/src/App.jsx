@@ -3,14 +3,16 @@ import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
 import FolderUpload from "./components/FolderUpload";
 import TrackListModal from "./components/TrackListModal";
+import AllTimeStats from "./components/AllTimeStats";
 
 function App() {
   const [data, setData] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [tracks, setTracks] = useState([]);
+  const [allTimeStats, setAllTimeStats] = useState(null);
 
-  const handleUploadComplete = (uploadedData) => {
+  const handleUploadComplete = async (uploadedData) => {
     const formatted = uploadedData
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .map((entry) => ({
@@ -24,6 +26,14 @@ function App() {
       ...new Set(formatted.map((d) => new Date(d.date).getFullYear())),
     ];
     setSelectedYear(years[years.length - 1].toString());
+
+    try {
+      const res = await fetch("http://localhost:8000/all_time_stats");
+      const stats = await res.json();
+      setAllTimeStats(stats); // <- new state you'll define
+    } catch (err) {
+      console.error("Failed to fetch all time stats:", err);
+    }
   };
 
   const handleDateClick = async (value) => {
@@ -134,6 +144,7 @@ function App() {
           onClose={() => setSelectedDate(null)}
         />
       )}
+      {allTimeStats && <AllTimeStats data={allTimeStats} />}
     </div>
   );
 }
