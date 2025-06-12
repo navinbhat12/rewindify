@@ -70,7 +70,7 @@ function App() {
         alignItems: "center",
         justifyContent: data.length > 0 ? "flex-start" : "center",
         padding: "2rem",
-        backgroundColor: "#1e1e1e",
+        backgroundColor: "#000000",
         color: "white",
         boxSizing: "border-box",
       }}

@@ -75,13 +75,13 @@ button:focus-visible {
   fill: #d6b3ff;
 }
 .color-purple-mid {
-  fill: #a659ff;
+  fill: #9147ff;
 }
 .color-purple-dark {
   fill: #5e00b6;
 }
 .color-max {
-  fill: #ffd700; /* gold */
+  fill: #3a0080;
 }
 
 .react-calendar-heatmap rect {
@@ -92,8 +92,8 @@ button:focus-visible {
 }
 
 .react-calendar-heatmap text {
-  font-size: 10px;
-  fill: #aaa;
+  font-size: 9px;
+  fill: #796e6e;
 }
 
 .react-calendar-heatmap .weekday {
@@ -110,7 +110,7 @@ button:focus-visible {
   color: #ccc;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
-  justify-content: flex-end; /* align to right */
+  justify-content: flex-start; /* align to right */
 }
 
 .legend-box {
@@ -128,11 +128,11 @@ button:focus-visible {
   background-color: #d6b3ff;
 }
 .legend-box.color-purple-mid {
-  background-color: #a659ff;
+  background-color: #9147ff;
 }
 .legend-box.color-purple-dark {
   background-color: #5e00b6;
 }
 .legend-box.color-max {
-  background-color: #ffd700;
+  background-color: #3a0080;
 }

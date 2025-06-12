@@ -169,7 +169,7 @@ def get_all_time_stats():
 
     print("📊 Columns available in parsed_df:", parsed_df.columns.tolist())
 
-    # Fill missing expected columns if they don’t exist
+    # Fill missing expected columns if they don't exist
     required = [
         "master_metadata_album_artist_name",
         "master_metadata_track_name",
@@ -183,16 +183,29 @@ def get_all_time_stats():
     # Add play count column
     parsed_df["play"] = 1
 
-    def top_by(col, metric):
-        return (
-            parsed_df.groupby(col)[metric]
-            .sum()
-            .sort_values(ascending=False)
-            .head(10)
-            .reset_index()
-            .rename(columns={col: "name", metric: metric})
-            .to_dict(orient="records")
-        )
+    def top_by(col, metric, include_artist=False):
+        if include_artist:
+            # For songs and albums, include artist name in the result
+            grouped = parsed_df.groupby([col, "master_metadata_album_artist_name"])[metric].sum()
+            grouped = grouped.sort_values(ascending=False).head(10)
+            return [
+                {
+                    "name": idx[0],
+                    "artist_name": idx[1],
+                    metric: val
+                }
+                for idx, val in grouped.items()
+            ]
+        else:
+            return (
+                parsed_df.groupby(col)[metric]
+                .sum()
+                .sort_values(ascending=False)
+                .head(10)
+                .reset_index()
+                .rename(columns={col: "name", metric: metric})
+                .to_dict(orient="records")
+            )
 
     return {
         "artists": {
@@ -200,14 +213,58 @@ def get_all_time_stats():
             "count": top_by("master_metadata_album_artist_name", "play"),
         },
         "songs": {
-            "time": top_by("master_metadata_track_name", "ms_played"),
-            "count": top_by("master_metadata_track_name", "play"),
+            "time": top_by("master_metadata_track_name", "ms_played", include_artist=True),
+            "count": top_by("master_metadata_track_name", "play", include_artist=True),
         },
         "albums": {
-            "time": top_by("master_metadata_album_album_name", "ms_played"),
-            "count": top_by("master_metadata_album_album_name", "play"),
+            "time": top_by("master_metadata_album_album_name", "ms_played", include_artist=True),
+            "count": top_by("master_metadata_album_album_name", "play", include_artist=True),
         },
     }
+
+@app.get("/album_image")
+def get_album_image(
+    album_name: str = Query(..., alias="album_name"),
+    artist_name: str = Query(..., alias="artist_name")
+):
+    token = get_spotify_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    query = f"album:{album_name} artist:{artist_name}"
+
+    response = requests.get(
+        "https://api.spotify.com/v1/search",
+        headers=headers,
+        params={"q": query, "type": "track", "limit": 1},
+    )
+
+    if response.status_code == 200:
+        results = response.json()
+        items = results.get("tracks", {}).get("items", [])
+        if items and "album" in items[0] and "images" in items[0]["album"]:
+            return {"image_url": items[0]["album"]["images"][0]["url"]}
+    return {"image_url": None}
+
+@app.get("/artist_image")
+def get_artist_image(
+    artist_name: str = Query(..., alias="artist_name")
+):
+    token = get_spotify_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    # Search directly for the artist
+    search_response = requests.get(
+        "https://api.spotify.com/v1/search",
+        headers=headers,
+        params={"q": artist_name, "type": "artist", "limit": 1},
+    )
+
+    if search_response.status_code == 200:
+        results = search_response.json()
+        items = results.get("artists", {}).get("items", [])
+        if items and "images" in items[0] and len(items[0]["images"]) > 0:
+            return {"image_url": items[0]["images"][0]["url"]}
+    
+    return {"image_url": None}
 
 
 
