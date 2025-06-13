@@ -4,6 +4,8 @@ import "react-calendar-heatmap/dist/styles.css";
 import FolderUpload from "./components/FolderUpload";
 import TrackListModal from "./components/TrackListModal";
 import AllTimeStats from "./components/AllTimeStats";
+import Chatbot from "./components/Chatbot";
+import NavBar from "./components/NavBar";
 
 function App() {
   const [data, setData] = useState([]);
@@ -16,6 +18,7 @@ function App() {
     songs: "time",
     albums: "time",
   });
+  const [chatbotOpen, setChatbotOpen] = useState(false);
 
   const handleUploadComplete = async (uploadedData) => {
     const formatted = uploadedData
@@ -75,7 +78,13 @@ function App() {
         boxSizing: "border-box",
       }}
     >
-      <h2 style={{ fontSize: "1.75rem", marginBottom: "1rem" }}>
+      <h2
+        style={{
+          fontSize: "1.75rem",
+          marginBottom: "1rem",
+          marginTop: "2.5rem",
+        }}
+      >
         🎧 Daily Spotify Listening (Seconds)
       </h2>
 
@@ -83,11 +92,13 @@ function App() {
 
       {data.length > 0 && (
         <>
+          <NavBar onChatbotOpen={() => setChatbotOpen(true)} />
+          <div style={{ paddingTop: "80px" }} />
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
             style={{
-              margin: "1.5rem 0",
+              margin: "0.7rem 0 0.5rem 0",
               fontSize: "1rem",
               padding: "0.4rem",
               borderRadius: "4px",
@@ -152,22 +163,23 @@ function App() {
             <div className="legend-box color-max" />
             <span>More</span>
           </div>
-        </>
-      )}
 
-      {selectedDate && (
-        <TrackListModal
-          date={selectedDate}
-          tracks={tracks}
-          onClose={() => setSelectedDate(null)}
-        />
-      )}
-      {allTimeStats && (
-        <AllTimeStats
-          data={allTimeStats}
-          metrics={metrics}
-          setMetrics={setMetrics}
-        />
+          {selectedDate && (
+            <TrackListModal
+              date={selectedDate}
+              tracks={tracks}
+              onClose={() => setSelectedDate(null)}
+            />
+          )}
+          {allTimeStats && (
+            <AllTimeStats
+              data={allTimeStats}
+              metrics={metrics}
+              setMetrics={setMetrics}
+            />
+          )}
+          <Chatbot open={chatbotOpen} onClose={() => setChatbotOpen(false)} />
+        </>
       )}
     </div>
   );

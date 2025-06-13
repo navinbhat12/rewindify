@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./AllTimeStats.css";
 
+const TABS = [
+  { key: "artists", label: "Artists" },
+  { key: "songs", label: "Songs" },
+  { key: "albums", label: "Albums" },
+];
+
 const AllTimeStats = ({ data, metrics, setMetrics }) => {
+  const [selectedTab, setSelectedTab] = useState("artists");
   const [enrichedSongs, setEnrichedSongs] = useState([]);
   const [enrichedAlbums, setEnrichedAlbums] = useState([]);
   const [enrichedArtists, setEnrichedArtists] = useState([]);
@@ -28,16 +35,15 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
           })
         );
 
-        // Wait for all images to finish loading
         await Promise.all(
           enriched.map(
             (track) =>
               new Promise((resolve) => {
-                if (!track.image_url) return resolve(); // Skip if no image
+                if (!track.image_url) return resolve();
                 const img = new Image();
                 img.src = track.image_url;
                 img.onload = resolve;
-                img.onerror = resolve; // Prevent hanging
+                img.onerror = resolve;
               })
           )
         );
@@ -72,16 +78,15 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
           })
         );
 
-        // Wait for all images to finish loading
         await Promise.all(
           enriched.map(
             (album) =>
               new Promise((resolve) => {
-                if (!album.image_url) return resolve(); // Skip if no image
+                if (!album.image_url) return resolve();
                 const img = new Image();
                 img.src = album.image_url;
                 img.onload = resolve;
-                img.onerror = resolve; // Prevent hanging
+                img.onerror = resolve;
               })
           )
         );
@@ -116,16 +121,15 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
           })
         );
 
-        // Wait for all images to finish loading
         await Promise.all(
           enriched.map(
             (artist) =>
               new Promise((resolve) => {
-                if (!artist.image_url) return resolve(); // Skip if no image
+                if (!artist.image_url) return resolve();
                 const img = new Image();
                 img.src = artist.image_url;
                 img.onload = resolve;
-                img.onerror = resolve; // Prevent hanging
+                img.onerror = resolve;
               })
           )
         );
@@ -149,31 +153,41 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
   };
 
   return (
-    <div className="stats-container">
+    <div
+      className="stats-container"
+      style={{
+        display: "flex",
+        gap: "1.5rem",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        maxWidth: "1400px",
+        margin: "0 auto",
+      }}
+    >
       {/* Artists Card */}
-      <div className="stat-card songs-card">
-        <div className="stat-header">
-          <h3>Top Artists</h3>
-          <div className="metric-toggle">
-            <button
-              className={metrics.artists === "time" ? "active" : ""}
-              onClick={() =>
-                setMetrics((prev) => ({ ...prev, artists: "time" }))
-              }
-            >
-              Time
-            </button>
-            <button
-              className={metrics.artists === "count" ? "active" : ""}
-              onClick={() =>
-                setMetrics((prev) => ({ ...prev, artists: "count" }))
-              }
-            >
-              Count
-            </button>
+      <div className="stat-card" style={{ width: "400px", maxWidth: "100%" }}>
+        <div className="alltime-header">
+          <h2 className="alltime-title">Top Artists</h2>
+          <div className="alltime-subtext">
+            Your most listened-to artists of all time.
           </div>
         </div>
-
+        <div className="metric-toggle">
+          <button
+            className={metrics.artists === "time" ? "active" : ""}
+            onClick={() => setMetrics((prev) => ({ ...prev, artists: "time" }))}
+          >
+            Time
+          </button>
+          <button
+            className={metrics.artists === "count" ? "active" : ""}
+            onClick={() =>
+              setMetrics((prev) => ({ ...prev, artists: "count" }))
+            }
+          >
+            Count
+          </button>
+        </div>
         <div className="track-list">
           {loadingArtists ? (
             <div className="loading-container">
@@ -183,6 +197,7 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
           ) : (
             enrichedArtists.map((artist, idx) => (
               <div key={idx} className="track-card">
+                <div className="track-rank-badge">{idx + 1}</div>
                 {artist.image_url && (
                   <img
                     src={artist.image_url}
@@ -203,27 +218,27 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
       </div>
 
       {/* Songs Card */}
-      <div className="stat-card songs-card">
-        <div className="stat-header">
-          <h3>Top Songs</h3>
-          <div className="metric-toggle">
-            <button
-              className={metrics.songs === "time" ? "active" : ""}
-              onClick={() => setMetrics((prev) => ({ ...prev, songs: "time" }))}
-            >
-              Time
-            </button>
-            <button
-              className={metrics.songs === "count" ? "active" : ""}
-              onClick={() =>
-                setMetrics((prev) => ({ ...prev, songs: "count" }))
-              }
-            >
-              Count
-            </button>
+      <div className="stat-card" style={{ width: "400px", maxWidth: "100%" }}>
+        <div className="alltime-header">
+          <h2 className="alltime-title">Top Songs</h2>
+          <div className="alltime-subtext">
+            Your most listened-to songs of all time.
           </div>
         </div>
-
+        <div className="metric-toggle">
+          <button
+            className={metrics.songs === "time" ? "active" : ""}
+            onClick={() => setMetrics((prev) => ({ ...prev, songs: "time" }))}
+          >
+            Time
+          </button>
+          <button
+            className={metrics.songs === "count" ? "active" : ""}
+            onClick={() => setMetrics((prev) => ({ ...prev, songs: "count" }))}
+          >
+            Count
+          </button>
+        </div>
         <div className="track-list">
           {loadingSongs ? (
             <div className="loading-container">
@@ -233,6 +248,7 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
           ) : (
             enrichedSongs.map((song, idx) => (
               <div key={idx} className="track-card">
+                <div className="track-rank-badge">{idx + 1}</div>
                 {song.image_url && (
                   <img
                     src={song.image_url}
@@ -254,29 +270,27 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
       </div>
 
       {/* Albums Card */}
-      <div className="stat-card songs-card">
-        <div className="stat-header">
-          <h3>Top Albums</h3>
-          <div className="metric-toggle">
-            <button
-              className={metrics.albums === "time" ? "active" : ""}
-              onClick={() =>
-                setMetrics((prev) => ({ ...prev, albums: "time" }))
-              }
-            >
-              Time
-            </button>
-            <button
-              className={metrics.albums === "count" ? "active" : ""}
-              onClick={() =>
-                setMetrics((prev) => ({ ...prev, albums: "count" }))
-              }
-            >
-              Count
-            </button>
+      <div className="stat-card" style={{ width: "400px", maxWidth: "100%" }}>
+        <div className="alltime-header">
+          <h2 className="alltime-title">Top Albums</h2>
+          <div className="alltime-subtext">
+            Your most listened-to albums of all time.
           </div>
         </div>
-
+        <div className="metric-toggle">
+          <button
+            className={metrics.albums === "time" ? "active" : ""}
+            onClick={() => setMetrics((prev) => ({ ...prev, albums: "time" }))}
+          >
+            Time
+          </button>
+          <button
+            className={metrics.albums === "count" ? "active" : ""}
+            onClick={() => setMetrics((prev) => ({ ...prev, albums: "count" }))}
+          >
+            Count
+          </button>
+        </div>
         <div className="track-list">
           {loadingAlbums ? (
             <div className="loading-container">
@@ -286,6 +300,7 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
           ) : (
             enrichedAlbums.map((album, idx) => (
               <div key={idx} className="track-card">
+                <div className="track-rank-badge">{idx + 1}</div>
                 {album.image_url && (
                   <img
                     src={album.image_url}

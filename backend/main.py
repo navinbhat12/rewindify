@@ -9,6 +9,8 @@ from io import BytesIO
 import os
 from dotenv import load_dotenv
 import requests
+from fastapi import Query
+import inspect
 
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
@@ -136,8 +138,6 @@ def get_spotify_token():
         raise Exception("Failed to get Spotify token")
     
 
-from fastapi import Query
-
 @app.get("/track_image")
 def get_album_image(
     track_name: str = Query(..., alias="track_name"),
@@ -198,14 +198,14 @@ def get_all_time_stats():
             ]
         else:
             return (
-                parsed_df.groupby(col)[metric]
-                .sum()
-                .sort_values(ascending=False)
-                .head(10)
-                .reset_index()
-                .rename(columns={col: "name", metric: metric})
-                .to_dict(orient="records")
-            )
+            parsed_df.groupby(col)[metric]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .reset_index()
+            .rename(columns={col: "name", metric: metric})
+            .to_dict(orient="records")
+        )
 
     return {
         "artists": {
@@ -266,7 +266,90 @@ def get_artist_image(
     
     return {"image_url": None}
 
+@app.get("/chatbot/query")
+def chatbot_query(
+    entity_type: str = Query(..., description="artist, song, or album"),
+    name: str = Query(..., description="Name of the artist, song, or album"),
+    timeframe: str = Query("all", description="all or a year, e.g. 2020"),
+    metric: str = Query("time", description="time or count"),
+    time_amount: str = Query("minutes", description="minutes or hours"),
+    artist: str = Query(None, description="Artist name (optional, for song queries)")
+):
+    global parsed_df
+    if parsed_df is None:
+        raise HTTPException(status_code=400, detail="Data not yet uploaded")
 
+    df = parsed_df.copy()
+    # Filter by timeframe
+    if timeframe != "all":
+        try:
+            year = int(timeframe)
+            df = df[df['ts'].dt.year == year]
+        except Exception:
+            return {"response": "Invalid year format for timeframe."}
+
+    if entity_type == "artist" and metric == "time":
+        mask = df["master_metadata_album_artist_name"].str.strip().str.lower() == name.strip().lower()
+        total_ms = df.loc[mask, "ms_played"].sum()
+        if time_amount == "hours":
+            total = total_ms / 1000 / 60 / 60
+            response = f"You have listened to {name} for {round(total, 1)} hours."
+        else:
+            total = total_ms / 1000 / 60
+            response = f"You have listened to {name} for {round(total, 1)} minutes."
+        return {"response": response}
+
+    elif entity_type == "album" and metric == "time":
+        df["album_clean"] = df["master_metadata_album_album_name"].fillna("").str.strip().str.lower()
+        df["artist_clean"] = df["master_metadata_album_artist_name"].fillna("").str.strip().str.lower()
+        album_name_clean = name.strip().lower()
+        filtered_df = df[df["album_clean"] == album_name_clean]
+        total_ms = filtered_df["ms_played"].sum()
+        if total_ms == 0:
+            return {"response": f"No listening data found for album '{name}'."}
+        if time_amount == "hours":
+            total = total_ms / 1000 / 60 / 60
+            response = f"You have listened to the album {name} for {round(total, 1)} hours."
+        else:
+            total = total_ms / 1000 / 60
+            response = f"You have listened to the album {name} for {round(total, 1)} minutes."
+        return {"response": response}
+
+    elif entity_type == "song" and metric == "count":
+        song_name_clean = name.strip().lower()
+        df["song_clean"] = df["master_metadata_track_name"].fillna("").str.strip().str.lower()
+        if artist:
+            artist_clean = artist.strip().lower()
+            df["artist_clean"] = df["master_metadata_album_artist_name"].fillna("").str.strip().str.lower()
+            filtered_df = df[(df["song_clean"] == song_name_clean) & (df["artist_clean"] == artist_clean)]
+        else:
+            filtered_df = df[df["song_clean"] == song_name_clean]
+        play_count = len(filtered_df)
+        if play_count == 0:
+            return {"response": f"No listening data found for song '{name}'" + (f" by '{artist}'" if artist else "") + "."}
+        if artist:
+            response = f"You have listened to the song {name} by {artist} {play_count} times."
+        else:
+            response = f"You have listened to the song {name} {play_count} times."
+        return {"response": response}
+
+    elif entity_type == "song" and metric == "time":
+        song_name_clean = name.strip().lower()
+        df["song_clean"] = df["master_metadata_track_name"].fillna("").str.strip().str.lower()
+        filtered_df = df[df["song_clean"] == song_name_clean]
+        total_ms = filtered_df["ms_played"].sum()
+        if total_ms == 0:
+            return {"response": f"No listening data found for song '{name}'."}
+        if time_amount == "hours":
+            total = total_ms / 1000 / 60 / 60
+            response = f"You have listened to the song {name} for {round(total, 1)} hours."
+        else:
+            total = total_ms / 1000 / 60
+            response = f"You have listened to the song {name} for {round(total, 1)} minutes."
+        return {"response": response}
+
+    else:
+        return {"response": "Sorry, I can only answer artist, album, or song listening time for all time right now."}
 
 
 

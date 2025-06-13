@@ -24,7 +24,7 @@ function FolderUpload({ onUploadComplete }) {
   };
 
   return (
-    <div style={{ marginBottom: "1.5rem" }}>
+    <div style={{ marginBottom: "0.2rem" }}>
       <label
         style={{
           background: "#9146ff",
