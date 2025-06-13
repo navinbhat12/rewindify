@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from datetime import datetime, timedelta
@@ -266,25 +266,25 @@ def get_artist_image(
     
     return {"image_url": None}
 
-@app.get("/chatbot/query")
-def chatbot_query(
-    entity_type: str = Query(..., description="artist, song, or album"),
-    name: str = Query(..., description="Name of the artist, song, or album"),
-    timeframe: str = Query("all", description="all or a year, e.g. 2020"),
-    metric: str = Query("time", description="time or count"),
-    time_amount: str = Query("minutes", description="minutes or hours"),
-    artist: str = Query(None, description="Artist name (optional, for song queries)")
-):
+@app.post("/chatbot/query")
+def chatbot_query(body: dict = Body(...)):
     global parsed_df
     if parsed_df is None:
         raise HTTPException(status_code=400, detail="Data not yet uploaded")
 
     df = parsed_df.copy()
-    # Filter by timeframe
+    entity_type = body.get("entity_type")
+    name = body.get("name")
+    artist = body.get("artist")
+    album = body.get("album")
+    timeframe = body.get("timeframe", "all")
+    metric = body.get("metric", "time")
+    time_amount = body.get("time_amount", "minutes")
+
     if timeframe != "all":
         try:
             year = int(timeframe)
-            df = df[df['ts'].dt.year == year]
+            df = df[df["ts"].dt.year == year]
         except Exception:
             return {"response": "Invalid year format for timeframe."}
 

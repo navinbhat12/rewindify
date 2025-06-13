@@ -41,7 +41,7 @@
 .chatbot-header-modal {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 1.1rem 1.5rem 0.7rem 1.5rem;
   font-size: 1.35rem;
   font-weight: 700;
@@ -49,6 +49,7 @@
   background: #23232a;
   border-top-left-radius: 18px;
   border-bottom: 1px solid #23234a;
+  position: relative;
 }
 
 .chatbot-close-btn {
@@ -57,7 +58,10 @@
   color: #fff;
   font-size: 2rem;
   cursor: pointer;
-  margin-left: 1rem;
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
   transition: color 0.18s;
 }
 

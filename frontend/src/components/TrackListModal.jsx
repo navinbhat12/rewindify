@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./TrackListModal.css";
 
-const TrackListModal = ({ date, onClose }) => {
+const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,6 +53,15 @@ const TrackListModal = ({ date, onClose }) => {
     fetchTracks();
   }, [date]);
 
+  const handleCopyAndQuery = async (trackName) => {
+    try {
+      await navigator.clipboard.writeText(trackName);
+    } catch {}
+    if (onChatbotQuery) {
+      onChatbotQuery(`How many times have I listened to the song ${trackName}`);
+    }
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -65,7 +74,11 @@ const TrackListModal = ({ date, onClose }) => {
             </div>
           ) : (
             tracks.map((track, idx) => (
-              <div key={idx} className="track-card">
+              <div
+                key={idx}
+                className="track-card"
+                style={{ position: "relative" }}
+              >
                 {track.image_url && (
                   <img
                     src={track.image_url}
@@ -77,6 +90,49 @@ const TrackListModal = ({ date, onClose }) => {
                   <div className="track-title">{track.track_name}</div>
                   <div className="track-artist">{track.artist_name}</div>
                 </div>
+                <button
+                  className="track-chatbot-btn"
+                  title="Ask StatsBot about this song"
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    margin: 0,
+                    cursor: "pointer",
+                    color: "#bbaaff",
+                    fontSize: "1.2rem",
+                    opacity: 0.7,
+                  }}
+                  onClick={() => handleCopyAndQuery(track.track_name)}
+                  aria-label={`Ask StatsBot about ${track.track_name}`}
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="10"
+                      stroke="#bbaaff"
+                      strokeWidth="1.5"
+                      fill="none"
+                    />
+                    <path
+                      d="M7 11h8M11 7v8"
+                      stroke="#bbaaff"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
               </div>
             ))
           )}

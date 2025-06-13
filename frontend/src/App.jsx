@@ -19,6 +19,7 @@ function App() {
     albums: "time",
   });
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [pendingChatbotMessage, setPendingChatbotMessage] = useState("");
 
   const handleUploadComplete = async (uploadedData) => {
     const formatted = uploadedData
@@ -169,6 +170,10 @@ function App() {
               date={selectedDate}
               tracks={tracks}
               onClose={() => setSelectedDate(null)}
+              onChatbotQuery={(msg) => {
+                setPendingChatbotMessage(msg);
+                setChatbotOpen(true);
+              }}
             />
           )}
           {allTimeStats && (
@@ -178,7 +183,12 @@ function App() {
               setMetrics={setMetrics}
             />
           )}
-          <Chatbot open={chatbotOpen} onClose={() => setChatbotOpen(false)} />
+          <Chatbot
+            open={chatbotOpen}
+            onClose={() => setChatbotOpen(false)}
+            pendingMessage={pendingChatbotMessage}
+            onMessageHandled={() => setPendingChatbotMessage("")}
+          />
         </>
       )}
     </div>

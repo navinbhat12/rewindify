@@ -4,7 +4,7 @@ import "./Chatbot.css";
 const DUMMY_RESPONSE =
   "I'm a friendly Spotify bot! (This is a dummy response.)";
 
-const Chatbot = ({ open, onClose }) => {
+const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
@@ -19,12 +19,40 @@ const Chatbot = ({ open, onClose }) => {
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
+  const hasSentPending = useRef(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
+  // Auto-send pendingMessage if provided and input is empty
+  useEffect(() => {
+    if (open && pendingMessage && !input && !hasSentPending.current) {
+      setInput(pendingMessage);
+      setTimeout(() => {
+        document
+          .querySelector(".chatbot-input")
+          ?.form?.dispatchEvent(
+            new Event("submit", { cancelable: true, bubbles: true })
+          );
+        hasSentPending.current = true;
+        if (onMessageHandled) onMessageHandled();
+      }, 100);
+    }
+    if (!pendingMessage) {
+      hasSentPending.current = false;
+    }
+  }, [open, pendingMessage, input, onMessageHandled]);
+
   if (!open) return null;
+
+  function extractFirstJsonObject(text) {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      return match[0];
+    }
+    throw new Error("No JSON object found in response");
+  }
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -33,184 +61,70 @@ const Chatbot = ({ open, onClose }) => {
     setMessages((msgs) => [...msgs, { sender: "user", text: userMsg }]);
     setInput("");
 
-    // Pattern: How many times (have|did) I listened to the song[,]? (Song Name) by (Artist Name) in (Year)
-    const matchSongCountArtist = userMsg.match(
-      /^how many times (?:have|did) i listen(?:ed)? to the song,? (.+?)(?: by (.+?))?(?: in (\d{4}))?$/i
-    );
-    // Pattern: How many times (have|did) I listened to the song[,]? (Song Name) in (Year)
-    const matchSongCount = userMsg.match(
-      /^how many times (?:have|did) i listen(?:ed)? to the song,? (.+?)(?: in (\d{4}))?$/i
-    );
-    // Pattern: How many minutes/hours (have|did) I listened to the album[,]? (Album Name) in (Year)
-    const matchAlbum = userMsg.match(
-      /^how many (minutes|hours) (?:have|did) i listen(?:ed)? to the album,? (.+?)(?: in (\d{4}))?$/i
-    );
-    // Pattern: How many minutes/hours (have|did) I listened to the song[,]? (Song Name) in (Year)
-    const matchSong = userMsg.match(
-      /^how many (minutes|hours) (?:have|did) i listen(?:ed)? to the song,? (.+?)(?: in (\d{4}))?$/i
-    );
-    // Pattern: How many minutes/hours (have|did) I listened to (Artist Name) in (Year)
-    const matchArtist = userMsg.match(
-      /^how many (minutes|hours) (?:have|did) i listen(?:ed)? to (.+?)(?: in (\d{4}))?$/i
-    );
-    if (matchSongCountArtist) {
-      const song = matchSongCountArtist[1].trim();
-      const artist = matchSongCountArtist[2]?.trim() || "";
-      const year = matchSongCountArtist[3] || "all";
+    try {
+      const prompt = `Return ONLY a valid JSON object, with no explanation, no markdown, and no code block. The JSON must have EXACTLY these fields (with these exact labels):\n\n{\n  \"entity_type\": \"song|album|artist\",\n  \"name\": string,\n  \"artist\": string or null,\n  \"album\": string or null,\n  \"metric\": \"time|count\",\n  \"timeframe\": string (a year, e.g. \"2020\", or \"all\"),\n  \"time_amount\": \"minutes|hours\" or null\n}\n\nIMPORTANT: Only fill in a field if it is explicitly mentioned in the user's question. If the artist or album is not mentioned, set them to null. Do NOT use your own knowledge to fill in missing information.\n\nQuestion: ${userMsg}`;
+
+      const response = await window.puter.ai.chat(prompt);
+      console.log("puter.ai.chat response:", typeof response, response);
+      let parsed;
+      if (typeof response === "string") {
+        const jsonString = extractFirstJsonObject(response);
+        parsed = JSON.parse(jsonString);
+      } else if (typeof response === "object" && response !== null) {
+        if (response.message && typeof response.message.content === "string") {
+          const jsonString = extractFirstJsonObject(response.message.content);
+          parsed = JSON.parse(jsonString);
+        } else {
+          parsed = response;
+        }
+      } else {
+        console.error("Unexpected response type from puter.ai.chat:", response);
+        throw new Error("Unexpected response type from puter.ai.chat");
+      }
+
+      const msgLower = userMsg.toLowerCase();
+      if (!msgLower.includes("artist") && parsed.entity_type === "song") {
+        parsed.artist = null;
+      }
+      if (!msgLower.includes("album") && parsed.entity_type === "song") {
+        parsed.album = null;
+      }
+
+      const res = await fetch("http://localhost:8000/chatbot/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+      const data = await res.json();
+
+      // Post-process the backend response for context-aware, conversational reply
       try {
-        const res = await fetch(
-          `http://localhost:8000/chatbot/query?entity_type=song&name=${encodeURIComponent(
-            song
-          )}&artist=${encodeURIComponent(
-            artist
-          )}&timeframe=${year}&metric=count`
-        );
-        const data = await res.json();
-        const response = data.response;
-        const yearSuffix = year !== "all" ? ` in ${year}` : "";
+        const rephrasePrompt = `Given the user's question and the backend's factual response, rephrase the response to be more context-aware and conversational. If the user's question specifies a year, include it in the response. Be concise and natural.\n\nUser's question: \"${userMsg}\"\nBackend's response: \"${data.response}\"\n\nReturn ONLY the improved response, with no extra explanation or formatting.`;
+        const improvedResponse = await window.puter.ai.chat(rephrasePrompt);
         setMessages((msgs) => [
           ...msgs,
           {
             sender: "bot",
-            text: response.replace(/\.$/, "") + yearSuffix + ".",
+            text:
+              typeof improvedResponse === "string"
+                ? improvedResponse
+                : improvedResponse.message?.content || data.response,
           },
         ]);
-      } catch {
+      } catch (rephraseErr) {
+        console.error("Rephrase error:", rephraseErr);
         setMessages((msgs) => [
           ...msgs,
-          {
-            sender: "bot",
-            text: "Sorry, I couldn't fetch your play count for that song and artist.",
-          },
+          { sender: "bot", text: data.response },
         ]);
       }
-    } else if (matchSongCount) {
-      const song = matchSongCount[1].trim();
-      const year = matchSongCount[2] || "all";
-      try {
-        const res = await fetch(
-          `http://localhost:8000/chatbot/query?entity_type=song&name=${encodeURIComponent(
-            song
-          )}&timeframe=${year}&metric=count`
-        );
-        const data = await res.json();
-        const response = data.response;
-        const yearSuffix = year !== "all" ? ` in ${year}` : "";
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: response.replace(/\.$/, "") + yearSuffix + ".",
-          },
-        ]);
-      } catch {
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: "Sorry, I couldn't fetch your play count for that song.",
-          },
-        ]);
-      }
-    } else if (matchAlbum) {
-      const timeAmount = matchAlbum[1].toLowerCase();
-      const album = matchAlbum[2].trim();
-      const year = matchAlbum[3] || "all";
-      try {
-        const res = await fetch(
-          `http://localhost:8000/chatbot/query?entity_type=album&name=${encodeURIComponent(
-            album
-          )}&timeframe=${year}&metric=time&time_amount=${timeAmount}`
-        );
-        const data = await res.json();
-        const response = data.response;
-        const yearSuffix = year !== "all" ? ` in ${year}` : "";
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: response.replace(/\.$/, "") + yearSuffix + ".",
-          },
-        ]);
-      } catch {
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: "Sorry, I couldn't fetch your listening time for that album.",
-          },
-        ]);
-      }
-    } else if (matchSong) {
-      const timeAmount = matchSong[1].toLowerCase();
-      const song = matchSong[2].trim();
-      const year = matchSong[3] || "all";
-      try {
-        const res = await fetch(
-          `http://localhost:8000/chatbot/query?entity_type=song&name=${encodeURIComponent(
-            song
-          )}&timeframe=${year}&metric=time&time_amount=${timeAmount}`
-        );
-        const data = await res.json();
-        const response = data.response;
-        const yearSuffix = year !== "all" ? ` in ${year}` : "";
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: response.replace(/\.$/, "") + yearSuffix + ".",
-          },
-        ]);
-      } catch {
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: "Sorry, I couldn't fetch your listening time for that song.",
-          },
-        ]);
-      }
-    } else if (matchArtist) {
-      const timeAmount = matchArtist[1].toLowerCase();
-      const artist = matchArtist[2].trim();
-      const year = matchArtist[3] || "all";
-      try {
-        const res = await fetch(
-          `http://localhost:8000/chatbot/query?entity_type=artist&name=${encodeURIComponent(
-            artist
-          )}&timeframe=${year}&metric=time&time_amount=${timeAmount}`
-        );
-        const data = await res.json();
-        const response = data.response;
-        const yearSuffix = year !== "all" ? ` in ${year}` : "";
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: response.replace(/\.$/, "") + yearSuffix + ".",
-          },
-        ]);
-      } catch {
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "bot",
-            text: "Sorry, I couldn't fetch your listening time for that artist.",
-          },
-        ]);
-      }
-    } else {
+    } catch (err) {
+      console.error(err);
       setMessages((msgs) => [
         ...msgs,
         {
           sender: "bot",
-          text:
-            "I can help you with your Spotify stats. Here are some example queries you can ask me:\n\n" +
-            "• How many minutes/hours did I listen to [Artist Name] in [Year]?\n" +
-            "• How many times did I listen to the song [Song Name] in [Year]?\n" +
-            "• How many times did I listen to the song [Song Name] by [Artist Name] in [Year]?\n" +
-            "• How many minutes/hours did I listen to the album [Album Name] in [Year]?\n\n" +
-            "Note: The [Year] part is optional. You can also use 'have I listened' instead of 'did I listen'.",
+          text: "Sorry, I couldn't understand or process your query. Please try again.",
         },
       ]);
     }
