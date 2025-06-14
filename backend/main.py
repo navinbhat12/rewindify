@@ -273,14 +273,14 @@ def chatbot_query(body: dict = Body(...)):
         raise HTTPException(status_code=400, detail="Data not yet uploaded")
 
     df = parsed_df.copy()
-    entity_type = body.get("entity_type")
-    name = body.get("name")
-    artist = body.get("artist")
+    track_name = body.get("track")
+    artist_name = body.get("artist")
     album = body.get("album")
     timeframe = body.get("timeframe", "all")
     metric = body.get("metric", "time")
     time_amount = body.get("time_amount", "minutes")
 
+    # Filter by year if specified
     if timeframe != "all":
         try:
             year = int(timeframe)
@@ -288,68 +288,54 @@ def chatbot_query(body: dict = Body(...)):
         except Exception:
             return {"response": "Invalid year format for timeframe."}
 
-    if entity_type == "artist" and metric == "time":
-        mask = df["master_metadata_album_artist_name"].str.strip().str.lower() == name.strip().lower()
-        total_ms = df.loc[mask, "ms_played"].sum()
-        if time_amount == "hours":
-            total = total_ms / 1000 / 60 / 60
-            response = f"You have listened to {name} for {round(total, 1)} hours."
-        else:
-            total = total_ms / 1000 / 60
-            response = f"You have listened to {name} for {round(total, 1)} minutes."
-        return {"response": response}
+    # Fill missing expected columns if they don't exist
+    for col in ["master_metadata_album_artist_name", "master_metadata_track_name", "master_metadata_album_album_name"]:
+        if col not in df.columns:
+            df[col] = None
 
-    elif entity_type == "album" and metric == "time":
-        df["album_clean"] = df["master_metadata_album_album_name"].fillna("").str.strip().str.lower()
-        df["artist_clean"] = df["master_metadata_album_artist_name"].fillna("").str.strip().str.lower()
-        album_name_clean = name.strip().lower()
-        filtered_df = df[df["album_clean"] == album_name_clean]
-        total_ms = filtered_df["ms_played"].sum()
-        if total_ms == 0:
-            return {"response": f"No listening data found for album '{name}'."}
-        if time_amount == "hours":
-            total = total_ms / 1000 / 60 / 60
-            response = f"You have listened to the album {name} for {round(total, 1)} hours."
-        else:
-            total = total_ms / 1000 / 60
-            response = f"You have listened to the album {name} for {round(total, 1)} minutes."
-        return {"response": response}
+    # Add play count column if not present
+    if "play" not in df.columns:
+        df["play"] = 1
 
-    elif entity_type == "song" and metric == "count":
-        song_name_clean = name.strip().lower()
-        df["song_clean"] = df["master_metadata_track_name"].fillna("").str.strip().str.lower()
-        if artist:
-            artist_clean = artist.strip().lower()
-            df["artist_clean"] = df["master_metadata_album_artist_name"].fillna("").str.strip().str.lower()
-            filtered_df = df[(df["song_clean"] == song_name_clean) & (df["artist_clean"] == artist_clean)]
+    # SONG PLAY COUNT: match all_time_stats logic
+    if metric == "count" and track_name:
+        grouped = df.groupby([
+            df["master_metadata_track_name"].fillna("").str.strip().str.lower(),
+            df["master_metadata_album_artist_name"].fillna("").str.strip().str.lower()
+        ])["play"].sum().reset_index()
+        grouped.columns = ["track_name", "artist_name", "play_count"]
+        if artist_name:
+            row = grouped[(grouped["track_name"] == track_name.strip().lower()) & (grouped["artist_name"] == artist_name.strip().lower())]
+            play_count = int(row["play_count"].iloc[0]) if not row.empty else 0
         else:
-            filtered_df = df[df["song_clean"] == song_name_clean]
-        play_count = len(filtered_df)
-        if play_count == 0:
-            return {"response": f"No listening data found for song '{name}'" + (f" by '{artist}'" if artist else "") + "."}
-        if artist:
-            response = f"You have listened to the song {name} by {artist} {play_count} times."
-        else:
-            response = f"You have listened to the song {name} {play_count} times."
-        return {"response": response}
+            rows = grouped[grouped["track_name"] == track_name.strip().lower()]
+            play_count = int(rows["play_count"].sum()) if not rows.empty else 0
+        return {"response": f"{play_count}"}
 
-    elif entity_type == "song" and metric == "time":
-        song_name_clean = name.strip().lower()
-        df["song_clean"] = df["master_metadata_track_name"].fillna("").str.strip().str.lower()
-        filtered_df = df[df["song_clean"] == song_name_clean]
-        total_ms = filtered_df["ms_played"].sum()
-        if total_ms == 0:
-            return {"response": f"No listening data found for song '{name}'."}
-        if time_amount == "hours":
-            total = total_ms / 1000 / 60 / 60
-            response = f"You have listened to the song {name} for {round(total, 1)} hours."
-        else:
-            total = total_ms / 1000 / 60
-            response = f"You have listened to the song {name} for {round(total, 1)} minutes."
-        return {"response": response}
+    # For all other cases, filter for artist, album, song if specified
+    if artist_name:
+        df = df[df["master_metadata_album_artist_name"].fillna("").str.strip().str.lower() == artist_name.strip().lower()]
+    if album:
+        df = df[df["master_metadata_album_album_name"].fillna("").str.strip().str.lower() == album.strip().lower()]
+    if track_name:
+        df = df[df["master_metadata_track_name"].fillna("").str.strip().str.lower() == track_name.strip().lower()]
 
+    # If nothing left after filtering
+    if df.empty:
+        return {"response": "No listening data found for the specified query."}
+
+    # Return time or count
+    if metric == "count":
+        play_count = len(df)
+        return {"response": f"{play_count}"}
     else:
-        return {"response": "Sorry, I can only answer artist, album, or song listening time for all time right now."}
+        total_ms = df["ms_played"].sum()
+        if time_amount == "hours":
+            total = total_ms / 1000 / 60 / 60
+            return {"response": f"{round(total, 1)} hours"}
+        else:
+            total = total_ms / 1000 / 60
+            return {"response": f"{round(total, 1)} minutes"}
 
 
 

@@ -9,12 +9,11 @@ const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
     {
       sender: "bot",
       text:
-        "Hi! I can help you with your Spotify stats. Here are some example queries you can ask me:\n\n" +
-        "• How many minutes/hours did I listen to [Artist Name] in [Year]?\n" +
-        "• How many times did I listen to the song [Song Name] in [Year]?\n" +
-        "• How many times did I listen to the song [Song Name] by [Artist Name] in [Year]?\n" +
-        "• How many minutes/hours did I listen to the album [Album Name] in [Year]?\n\n" +
-        "Note: The [Year] part is optional. You can also use 'have I listened' instead of 'did I listen'.",
+        "Hey! 👋 Ask me anything about your Spotify stats! For example:\n\n" +
+        "• How many hours did I listen to [Artist]?\n" +
+        "• How many times did I play [Song]?\n" +
+        "• How many hours on [Album]?\n\n" +
+        "Add 'in 2023' to any question for year-specific stats! 🎵",
     },
   ]);
   const [input, setInput] = useState("");
@@ -62,7 +61,7 @@ const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
     setInput("");
 
     try {
-      const prompt = `Return ONLY a valid JSON object, with no explanation, no markdown, and no code block. The JSON must have EXACTLY these fields (with these exact labels):\n\n{\n  \"entity_type\": \"song|album|artist\",\n  \"name\": string,\n  \"artist\": string or null,\n  \"album\": string or null,\n  \"metric\": \"time|count\",\n  \"timeframe\": string (a year, e.g. \"2020\", or \"all\"),\n  \"time_amount\": \"minutes|hours\" or null\n}\n\nIMPORTANT: Only fill in a field if it is explicitly mentioned in the user's question. If the artist or album is not mentioned, set them to null. Do NOT use your own knowledge to fill in missing information.\n\nQuestion: ${userMsg}`;
+      const prompt = `Return ONLY a valid JSON object, with no explanation, no markdown, and no code block. The JSON must have EXACTLY these fields (with these exact labels):\n\n{\n  \"track\": string or null,\n  \"artist\": string or null,\n  \"album\": string or null,\n  \"metric\": \"time|count\",\n  \"timeframe\": string (a year, e.g. \"2020\", or \"all\"),\n  \"time_amount\": \"minutes|hours\" or null\n}\n\nIMPORTANT: Only fill in a field if it is explicitly mentioned in the user's question. If the track, artist or album is not mentioned, set them to null. Do NOT use your own knowledge to fill in missing information.\n\nQuestion: ${userMsg}`;
 
       const response = await window.puter.ai.chat(prompt);
       console.log("puter.ai.chat response:", typeof response, response);
@@ -83,12 +82,12 @@ const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
       }
 
       const msgLower = userMsg.toLowerCase();
-      if (!msgLower.includes("artist") && parsed.entity_type === "song") {
+      /*if (!msgLower.includes("artist") && parsed.entity_type === "song") {
         parsed.artist = null;
       }
       if (!msgLower.includes("album") && parsed.entity_type === "song") {
         parsed.album = null;
-      }
+      }*/
 
       const res = await fetch("http://localhost:8000/chatbot/query", {
         method: "POST",

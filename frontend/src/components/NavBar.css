@@ -30,7 +30,7 @@
   padding: 0.6rem 1.5rem;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(90deg, #9147ff 0%, #5e00b6 100%);
+  background: linear-gradient(90deg, #23064f 0%, #07010c 100%);
   color: #fff;
   font-weight: 600;
   font-size: 1.05rem;
@@ -42,6 +42,6 @@
 }
 
 .navbar-chatbot-btn:hover {
-  background: linear-gradient(90deg, #5e00b6 0%, #9147ff 100%);
+  background: linear-gradient(90deg, #10011e 0%, #9147ff 100%);
   transform: scale(1.04);
 }
