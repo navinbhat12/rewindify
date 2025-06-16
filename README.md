@@ -9,6 +9,24 @@ An interactive dashboard that visualizes your Spotify listening history and prov
 - 🤖 AI-powered chatbot to answer questions about your listening habits
 - 📈 All-time statistics and insights
 
+## Screenshots
+
+### Initial Login
+
+![Initial Login](initiallogin.png)
+
+### Home Page
+
+![Home Page](HomePage.png)
+
+### Track List Modal
+
+![Track List Modal](TrackListModal.png)
+
+### StatsBot
+
+![StatsBot](Statbot.png)
+
 ## Prerequisites
 
 - Node.js (v14 or higher)
@@ -71,7 +89,6 @@ An interactive dashboard that visualizes your Spotify listening history and prov
    cd frontend
    npm run dev
    ```
-
 
 ## Usage
 
