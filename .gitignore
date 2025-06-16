@@ -1,6 +1,5 @@
 # Ignore raw data files
 backend/data/
-*.json
 
 # Ignore Python cache
 __pycache__/
