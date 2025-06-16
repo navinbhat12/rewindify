@@ -12,13 +12,15 @@
 }
 
 .modal {
-  background: #0f0819;
-  padding: 1.5rem;
-  border-radius: 8px;
+  background: #2c222c;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 650px;
   max-height: 50vh;
-  width: 600px;
   overflow-y: auto;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   color: white;
 }
 

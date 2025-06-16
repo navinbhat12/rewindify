@@ -65,81 +65,89 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3 style={{ marginBottom: "1rem" }}>Tracks from {date}</h3>
-        <div className="track-list">
-          {loading ? (
-            <div className="loading-container">
-              <div className="spinner" />
-              <p>Going back in time....</p>
-            </div>
-          ) : (
-            tracks.map((track, idx) => (
-              <div
-                key={idx}
-                className="track-card"
-                style={{ position: "relative" }}
-              >
-                {track.image_url && (
-                  <img
-                    src={track.image_url}
-                    alt="album"
-                    className="track-image"
-                  />
-                )}
-                <div className="track-info">
-                  <div className="track-title">{track.track_name}</div>
-                  <div className="track-artist">{track.artist_name}</div>
-                </div>
-                <button
-                  className="track-chatbot-btn"
-                  title="Ask StatsBot about this song"
-                  style={{
-                    position: "absolute",
-                    right: 10,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    margin: 0,
-                    cursor: "pointer",
-                    color: "#bbaaff",
-                    fontSize: "1.2rem",
-                    opacity: 0.7,
-                  }}
-                  onClick={() => handleCopyAndQuery(track.track_name)}
-                  aria-label={`Ask StatsBot about ${track.track_name}`}
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 22 22"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle
-                      cx="11"
-                      cy="11"
-                      r="10"
-                      stroke="#bbaaff"
-                      strokeWidth="1.5"
-                      fill="none"
-                    />
-                    <path
-                      d="M7 11h8M11 7v8"
-                      stroke="#bbaaff"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>
+              Tracks from{" "}
+              {new Date(date).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </h2>
+          </div>
+          <div className="track-list">
+            {loading ? (
+              <div className="loading-container">
+                <div className="spinner" />
+                <p>Going back in time....</p>
               </div>
-            ))
-          )}
+            ) : (
+              tracks.map((track, idx) => (
+                <div
+                  key={idx}
+                  className="track-card"
+                  style={{ position: "relative" }}
+                >
+                  {track.image_url && (
+                    <img
+                      src={track.image_url}
+                      alt="album"
+                      className="track-image"
+                    />
+                  )}
+                  <div className="track-info">
+                    <div className="track-title">{track.track_name}</div>
+                    <div className="track-artist">{track.artist_name}</div>
+                  </div>
+                  <button
+                    className="track-chatbot-btn"
+                    title="Ask StatsBot about this song"
+                    style={{
+                      position: "absolute",
+                      right: 10,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      margin: 0,
+                      cursor: "pointer",
+                      color: "#bbaaff",
+                      fontSize: "1.2rem",
+                      opacity: 0.7,
+                    }}
+                    onClick={() => handleCopyAndQuery(track.track_name)}
+                    aria-label={`Ask StatsBot about ${track.track_name}`}
+                  >
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 22 22"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle
+                        cx="11"
+                        cy="11"
+                        r="10"
+                        stroke="#bbaaff"
+                        strokeWidth="1.5"
+                        fill="none"
+                      />
+                      <path
+                        d="M7 11h8M11 7v8"
+                        stroke="#bbaaff"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-        <button onClick={onClose} className="close-button">
-          Close
-        </button>
       </div>
     </div>
   );
