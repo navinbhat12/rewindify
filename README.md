@@ -72,7 +72,6 @@ An interactive dashboard that visualizes your Spotify listening history and prov
    npm run dev
    ```
 
-   Open your browser at `http://localhost:3000`
 
 ## Usage
 
