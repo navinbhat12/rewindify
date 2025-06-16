@@ -99,15 +99,17 @@ def get_tracks_for_date(date: str):
         return []
 
     # Extract relevant metadata per track
-    tracks = filtered[['master_metadata_track_name', 'master_metadata_album_artist_name']].dropna()
+    tracks = filtered[['master_metadata_track_name', 'master_metadata_album_artist_name', 'ms_played']].dropna()
 
     results = []
     for _, row in tracks.iterrows():
         track_name = row['master_metadata_track_name']
         artist_name = row['master_metadata_album_artist_name']
+        ms_played = row['ms_played']
         results.append({
             "track_name": track_name,
-            "artist_name": artist_name
+            "artist_name": artist_name,
+            "ms_played": ms_played,
         })
 
     return results

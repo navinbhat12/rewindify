@@ -13,7 +13,7 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
         const data = await res.json();
 
         const enriched = await Promise.all(
-          data.map(async ({ track_name, artist_name }) => {
+          data.map(async ({ track_name, artist_name, ms_played }) => {
             const imageRes = await fetch(
               `http://localhost:8000/track_image?track_name=${encodeURIComponent(
                 track_name
@@ -24,6 +24,7 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
               track_name,
               artist_name,
               image_url: imgData.image_url,
+              ms_played,
             };
           })
         );
@@ -76,6 +77,16 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
               })}
             </h2>
           </div>
+          {!loading && (
+            <div style={{ marginBottom: "1rem", color: "#a0a0a0" }}>
+              Total listening time:{" "}
+              {Math.round(
+                tracks.reduce((acc, track) => acc + track.ms_played / 60000, 0)
+              )}{" "}
+              minutes
+            </div>
+          )}
+
           <div className="track-list">
             {loading ? (
               <div className="loading-container">
