@@ -5,7 +5,7 @@ An interactive dashboard that visualizes your Spotify listening history and prov
 ## Features
 
 - 📊 Interactive heatmap showing daily listening activity
-- 🎵 Track list view for any selected day
+- 🎵 Track list view + Minutes listened for any selected day
 - 🤖 AI-powered chatbot to answer questions about your listening habits
 - 📈 All-time statistics and insights
 
