@@ -11,7 +11,7 @@ An interactive dashboard that visualizes your Spotify listening history and prov
 
 ## Screenshots
 
-### Initial Login
+### Initial Upload
 
 ![Initial Login](InitialLogin.png)
 
