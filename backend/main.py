@@ -44,8 +44,13 @@ init_database()
 def clear_database_on_exit():
     """Clear user data when server shuts down for privacy"""
     try:
-        if os.path.exists("spotify_data.db"):
-            os.remove("spotify_data.db")
+        # Use the same path as the database configuration
+        from database import get_database_url
+        db_url = get_database_url()
+        # Extract file path from SQLite URL (sqlite:///path/to/file.db)
+        db_path = db_url.replace("sqlite:///", "")
+        if os.path.exists(db_path):
+            os.remove(db_path)
             print("🗑️ Database cleared for privacy")
     except Exception as e:
         print(f"⚠️ Could not clear database: {e}")

@@ -149,165 +149,361 @@ function App() {
         {data.length === 0 ? (
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "80vh",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1000,
             }}
           >
-            <h2
-              style={{
-                fontSize: "2rem",
-                marginBottom: "1rem",
-                color: "#a0a0a0",
-                fontFamily:
-                  "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-              }}
-            >
-              Upload Your Spotify Data
-            </h2>
-            <FolderUpload onUploadComplete={handleUploadComplete} />
+            <div className="upload-page">
+              <div className="upload-content">
+                <div className="brand-header">
+                  <div className="logo">
+                    <svg
+                      width="64"
+                      height="64"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+                        fill="#9146ff"
+                      />
+                      <path
+                        d="M19 15L19.74 12.26L22 12L19.74 11.74L19 9L18.26 11.74L16 12L18.26 12.26L19 15Z"
+                        fill="#9146ff"
+                      />
+                      <path
+                        d="M5 15L5.74 12.26L8 12L5.74 11.74L5 9L4.26 11.74L2 12L4.26 12.26L5 15Z"
+                        fill="#9146ff"
+                      />
+                    </svg>
+                  </div>
+                  <h1>Spotify Dashboard</h1>
+                  <p>Visualize your listening habits with beautiful insights</p>
+                </div>
+
+                <FolderUpload onUploadComplete={handleUploadComplete} />
+
+                <div className="features">
+                  <div className="feature">
+                    <div className="feature-icon">📊</div>
+                    <h3>Interactive Heatmap</h3>
+                    <p>See your daily listening patterns at a glance</p>
+                  </div>
+                  <div className="feature">
+                    <div className="feature-icon">🎵</div>
+                    <h3>Track Details</h3>
+                    <p>Explore what you listened to on any day</p>
+                  </div>
+                  <div className="feature">
+                    <div className="feature-icon">🤖</div>
+                    <h3>AI Chatbot</h3>
+                    <p>Ask questions about your music taste</p>
+                  </div>
+                </div>
+              </div>
+
+              <style jsx>{`
+                .upload-page {
+                  min-height: 100vh;
+                  width: 100vw;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  background: linear-gradient(
+                    135deg,
+                    #0f0f23 0%,
+                    #1a1a2e 50%,
+                    #16213e 100%
+                  );
+                  padding: 0;
+                  margin: 0;
+                  overflow-y: auto;
+                }
+
+                .upload-content {
+                  max-width: 800px;
+                  width: 100%;
+                  text-align: center;
+                  padding: 2rem 0;
+                }
+
+                .brand-header {
+                  margin-bottom: 3rem;
+                }
+
+                .logo {
+                  margin-bottom: 1.5rem;
+                  filter: drop-shadow(0 8px 16px rgba(145, 70, 255, 0.3));
+                }
+
+                .brand-header h1 {
+                  font-size: 3rem;
+                  font-weight: 700;
+                  margin: 0 0 0.5rem 0;
+                  background: linear-gradient(135deg, #ffffff 0%, #9146ff 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  background-clip: text;
+                  font-family: "Inter", -apple-system, BlinkMacSystemFont,
+                    "Segoe UI", Roboto, sans-serif;
+                }
+
+                .brand-header p {
+                  font-size: 1.1rem;
+                  color: #a0a0a0;
+                  margin: 0;
+                  font-weight: 400;
+                }
+
+                .features {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                  gap: 2rem;
+                  margin-top: 4rem;
+                }
+
+                .feature {
+                  background: rgba(255, 255, 255, 0.02);
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  border-radius: 12px;
+                  padding: 1.5rem;
+                  transition: all 0.3s ease;
+                }
+
+                .feature:hover {
+                  background: rgba(255, 255, 255, 0.05);
+                  border-color: rgba(145, 70, 255, 0.3);
+                  transform: translateY(-2px);
+                }
+
+                .feature-icon {
+                  font-size: 2rem;
+                  margin-bottom: 1rem;
+                }
+
+                .feature h3 {
+                  font-size: 1.1rem;
+                  font-weight: 600;
+                  margin: 0 0 0.5rem 0;
+                  color: #ffffff;
+                }
+
+                .feature p {
+                  font-size: 0.9rem;
+                  color: #a0a0a0;
+                  margin: 0;
+                  line-height: 1.4;
+                }
+
+                @media (max-width: 768px) {
+                  .brand-header h1 {
+                    font-size: 2.5rem;
+                  }
+
+                  .features {
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
+                    margin-top: 3rem;
+                  }
+                }
+              `}</style>
+            </div>
           </div>
         ) : (
-          <>
+          <div className="dashboard-container">
+            <style jsx>{`
+              .dashboard-container {
+                min-height: 100vh;
+                width: 100vw;
+                background: linear-gradient(
+                  135deg,
+                  #0f0f23 0%,
+                  #1a1a2e 50%,
+                  #16213e 100%
+                );
+                padding: 0;
+                margin: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                overflow-y: auto;
+                padding-top: 70px; /* Push content down */
+              }
+
+              .dashboard-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 2rem;
+              }
+
+              .heatmap-title-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1rem;
+              }
+
+              .heatmap-title-container select {
+                margin: 0;
+                font-size: 1rem;
+                padding: 0.4rem 0.8rem;
+                border-radius: 8px;
+                background: rgba(145, 70, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(145, 70, 255, 0.3);
+                transition: all 0.3s ease;
+                font-family: "Inter", -apple-system, BlinkMacSystemFont,
+                  "Segoe UI", Roboto, sans-serif;
+              }
+
+              .heatmap-title-container select:hover {
+                border-color: rgba(145, 70, 255, 0.5);
+                background: rgba(145, 70, 255, 0.15);
+              }
+
+              .heatmap-title-container select:focus {
+                outline: none;
+                border-color: #9146ff;
+                box-shadow: 0 0 0 2px rgba(145, 70, 255, 0.2);
+              }
+
+              .heatmap-title-container h3 {
+                margin: 0;
+                font-weight: 600;
+                font-size: 1.5rem;
+                font-family: "Inter", -apple-system, BlinkMacSystemFont,
+                  "Segoe UI", Roboto, sans-serif;
+                text-align: left;
+                color: #ffffff;
+              }
+
+              .dashboard-content .heatmap-legend {
+                margin-top: 0rem;
+                margin-left: auto;
+                margin-right: auto;
+                max-width: 1400px;
+                padding-left: 2rem;
+              }
+
+              .dashboard-content .heatmap-legend span {
+                color: #a0a0a0;
+                font-weight: 500;
+              }
+            `}</style>
             <NavBar
               onChatbotOpen={() => setChatbotOpen(true)}
               onClearData={handleClearData}
             />
-            <div style={{ paddingTop: "20px" }} />
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              style={{
-                margin: "0.7rem 0 0.5rem 0",
-                fontSize: "1rem",
-                padding: "0.4rem",
-                borderRadius: "4px",
-                backgroundColor: "#2e2e2e",
-                color: "white",
-                border: "1px solid #444",
-              }}
-            >
-              {Array.from(
-                new Set(data.map((d) => new Date(d.date).getFullYear()))
-              )
-                .sort()
-                .map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-            </select>
+            <div className="dashboard-content">
+              <div className="heatmap-title-container">
+                <h3>{selectedYear} Spotify Listening</h3>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                >
+                  {Array.from(
+                    new Set(data.map((d) => new Date(d.date).getFullYear()))
+                  )
+                    .sort()
+                    .map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                </select>
+              </div>
 
-            <h3
-              style={{
-                margin: "0.5rem 0 0.25rem",
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-                fontFamily:
-                  "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                textAlign: "left",
-                maxWidth: "1400px",
-                marginLeft: "auto",
-                marginRight: "auto",
-                paddingLeft: "0",
-                color: "#a0a0a0",
-              }}
-            >
-              {selectedYear} Spotify Listening
-            </h3>
-
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "1400px",
-                marginTop: "1rem",
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: "0.5rem",
-              }}
-            >
-              <CalendarHeatmap
-                startDate={new Date(`${selectedYear}-01-01`)}
-                endDate={new Date(`${selectedYear}-12-31`)}
-                values={filteredData}
-                onClick={handleDateClick}
-                classForValue={(value) => {
-                  if (!value || value.count < 120) return "color-white";
-                  if (value.count < 1000) return "color-purple-light";
-                  if (value.count < 2200) return "color-purple-mid";
-                  if (value.count < 4700) return "color-purple-dark";
-                  return "color-max";
-                }}
-                tooltipDataAttrs={(value) =>
-                  value.date
-                    ? {
-                        "data-tip": `${value.date}: ${value.count} sec`,
-                      }
-                    : {}
-                }
-                weekdayLabels={[
-                  "Sun",
-                  "Mon",
-                  "Tue",
-                  "Wed",
-                  "Thu",
-                  "Fri",
-                  "Sat",
-                ]}
-                showWeekdayLabels
-                style={{
-                  "--react-calendar-heatmap-text-color": "#a0a0a0",
-                  "--react-calendar-heatmap-month-label-color": "#a0a0a0",
-                  "--react-calendar-heatmap-weekday-label-color": "#a0a0a0",
-                }}
-              />
               <div
-                className="heatmap-legend"
                 style={{
-                  marginTop: "0rem",
-                  marginLeft: "auto",
-                  marginRight: "auto",
+                  width: "100%",
                   maxWidth: "1400px",
-                  paddingLeft: "2rem",
+                  marginTop: "1rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  marginBottom: "0.5rem",
                 }}
               >
-                <span>Less</span>
-                <div className="legend-box color-white" />
-                <div className="legend-box color-purple-light" />
-                <div className="legend-box color-purple-mid" />
-                <div className="legend-box color-purple-dark" />
-                <div className="legend-box color-max" />
-                <span>More</span>
+                <CalendarHeatmap
+                  startDate={new Date(`${selectedYear}-01-01`)}
+                  endDate={new Date(`${selectedYear}-12-31`)}
+                  values={filteredData}
+                  onClick={handleDateClick}
+                  classForValue={(value) => {
+                    if (!value || value.count < 120) return "color-white";
+                    if (value.count < 1000) return "color-purple-light";
+                    if (value.count < 2200) return "color-purple-mid";
+                    if (value.count < 4700) return "color-purple-dark";
+                    return "color-max";
+                  }}
+                  tooltipDataAttrs={(value) =>
+                    value.date
+                      ? {
+                          "data-tip": `${value.date}: ${value.count} sec`,
+                        }
+                      : {}
+                  }
+                  weekdayLabels={[
+                    "Sun",
+                    "Mon",
+                    "Tue",
+                    "Wed",
+                    "Thu",
+                    "Fri",
+                    "Sat",
+                  ]}
+                  showWeekdayLabels
+                  style={{
+                    "--react-calendar-heatmap-text-color": "#a0a0a0",
+                    "--react-calendar-heatmap-month-label-color": "#a0a0a0",
+                    "--react-calendar-heatmap-weekday-label-color": "#a0a0a0",
+                  }}
+                />
+                <div className="heatmap-legend">
+                  <span>Less</span>
+                  <div className="legend-box color-white" />
+                  <div className="legend-box color-purple-light" />
+                  <div className="legend-box color-purple-mid" />
+                  <div className="legend-box color-purple-dark" />
+                  <div className="legend-box color-max" />
+                  <span>More</span>
+                </div>
               </div>
-            </div>
 
-            {selectedDate && (
-              <TrackListModal
-                date={selectedDate}
-                tracks={tracks}
-                onClose={() => setSelectedDate(null)}
-                onChatbotQuery={(msg) => {
-                  setPendingChatbotMessage(msg);
-                  setChatbotOpen(true);
-                }}
+              {selectedDate && (
+                <TrackListModal
+                  date={selectedDate}
+                  tracks={tracks}
+                  onClose={() => setSelectedDate(null)}
+                  onChatbotQuery={(msg) => {
+                    setPendingChatbotMessage(msg);
+                    setChatbotOpen(true);
+                  }}
+                />
+              )}
+              {allTimeStats && (
+                <AllTimeStats
+                  data={allTimeStats}
+                  metrics={metrics}
+                  setMetrics={setMetrics}
+                />
+              )}
+              <Chatbot
+                open={chatbotOpen}
+                onClose={() => setChatbotOpen(false)}
+                pendingMessage={pendingChatbotMessage}
+                onMessageHandled={() => setPendingChatbotMessage("")}
               />
-            )}
-            {allTimeStats && (
-              <AllTimeStats
-                data={allTimeStats}
-                metrics={metrics}
-                setMetrics={setMetrics}
-              />
-            )}
-            <Chatbot
-              open={chatbotOpen}
-              onClose={() => setChatbotOpen(false)}
-              pendingMessage={pendingChatbotMessage}
-              onMessageHandled={() => setPendingChatbotMessage("")}
-            />
-          </>
+            </div>
+          </div>
         )}
       </div>
     </div>

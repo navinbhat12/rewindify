@@ -32,3 +32,6 @@ frontend/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Helper scripts (hidden from main branch)
+.scripts/

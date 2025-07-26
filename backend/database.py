@@ -43,7 +43,11 @@ class DailyStats(Base):
 # Database setup
 def get_database_url():
     """Get database URL - SQLite for development"""
-    return "sqlite:///./spotify_data.db"
+    import os
+    # Get the directory where this file is located
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(current_dir, "spotify_data.db")
+    return f"sqlite:///{db_path}"
 
 def create_engine_with_optimizations():
     """Create SQLite engine with performance optimizations"""
