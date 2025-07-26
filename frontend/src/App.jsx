@@ -52,6 +52,11 @@ function App() {
   }, [allTimeStats]);
 
   const handleUploadComplete = async (uploadedData) => {
+    // Clear any existing cached data
+    sessionStorage.removeItem("spotifyData");
+    sessionStorage.removeItem("allTimeStats");
+    sessionStorage.removeItem("selectedYear");
+
     const formatted = uploadedData
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .map((entry) => ({
@@ -69,10 +74,27 @@ function App() {
     try {
       const res = await fetch("http://localhost:8000/all_time_stats");
       const stats = await res.json();
+      console.log("📊 Received all-time stats:", stats); // Debug log
       setAllTimeStats(stats);
     } catch (err) {
       console.error("Failed to fetch all time stats:", err);
     }
+  };
+
+  const handleClearData = () => {
+    // Clear all session storage
+    sessionStorage.removeItem("spotifyData");
+    sessionStorage.removeItem("allTimeStats");
+    sessionStorage.removeItem("selectedYear");
+
+    // Reset all state
+    setData([]);
+    setSelectedYear("");
+    setAllTimeStats(null);
+    setSelectedDate(null);
+    setTracks([]);
+    setChatbotOpen(false);
+    setPendingChatbotMessage("");
   };
 
   const handleDateClick = async (value) => {
@@ -133,7 +155,10 @@ function App() {
           </div>
         ) : (
           <>
-            <NavBar onChatbotOpen={() => setChatbotOpen(true)} />
+            <NavBar
+              onChatbotOpen={() => setChatbotOpen(true)}
+              onClearData={handleClearData}
+            />
             <div style={{ paddingTop: "20px" }} />
             <select
               value={selectedYear}

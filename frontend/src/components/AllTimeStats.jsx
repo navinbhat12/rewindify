@@ -147,9 +147,9 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
 
   const formatValue = (item, metric) => {
     if (metric === "time") {
-      return `${(item.ms_played / 1000 / 60 / 60).toFixed(1)} hrs`;
+      return `${item.time} hrs`;
     }
-    return `${item.play} plays`;
+    return `${item.count} plays`;
   };
 
   return (
