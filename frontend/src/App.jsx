@@ -82,19 +82,35 @@ function App() {
   };
 
   const handleClearData = () => {
-    // Clear all session storage
+    // Clear session storage
     sessionStorage.removeItem("spotifyData");
     sessionStorage.removeItem("allTimeStats");
     sessionStorage.removeItem("selectedYear");
 
+    // Clear backend database
+    fetch("http://localhost:8000/clear_data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("🗑️ Backend data cleared:", data);
+      })
+      .catch((error) => {
+        console.error("❌ Error clearing backend data:", error);
+      });
+
     // Reset all state
     setData([]);
     setSelectedYear("");
-    setAllTimeStats(null);
-    setSelectedDate(null);
-    setTracks([]);
+    setAllTimeStats({
+      artists: { time: [], count: [] },
+      songs: { time: [], count: [] },
+      albums: { time: [], count: [] },
+    });
     setChatbotOpen(false);
-    setPendingChatbotMessage("");
   };
 
   const handleDateClick = async (value) => {

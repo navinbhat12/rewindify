@@ -13,6 +13,8 @@ from fastapi import Query
 import inspect
 import tempfile
 import shutil
+import atexit
+import signal
 
 # Import database modules
 from database import init_database, get_session, optimize_dataframe, bulk_insert_streaming_data, update_daily_stats
@@ -37,6 +39,43 @@ app.add_middleware(
 
 # Initialize database on startup
 init_database()
+
+# Cleanup function for privacy
+def clear_database_on_exit():
+    """Clear user data when server shuts down for privacy"""
+    try:
+        if os.path.exists("spotify_data.db"):
+            os.remove("spotify_data.db")
+            print("🗑️ Database cleared for privacy")
+    except Exception as e:
+        print(f"⚠️ Could not clear database: {e}")
+
+# Signal handler for graceful shutdown
+def signal_handler(signum, frame):
+    """Handle interrupt signals (Ctrl+C) to ensure database cleanup"""
+    print(f"\n🛑 Received signal {signum}, shutting down gracefully...")
+    clear_database_on_exit()
+    exit(0)
+
+# Register cleanup functions
+atexit.register(clear_database_on_exit)
+signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
+
+@app.get("/")
+def welcome():
+    """Welcome message for the Spotify Dashboard API"""
+    return {
+        "message": "🎵 Welcome to Spotify Dashboard API!",
+        "description": "Upload your Spotify streaming history to visualize your listening habits",
+        "endpoints": {
+            "upload": "POST /upload - Upload Spotify JSON files",
+            "stats": "GET /all_time_stats - Get all-time statistics",
+            "tracks": "GET /tracks/{date} - Get tracks for specific date",
+            "clear": "POST /clear_data - Clear all user data"
+        },
+        "status": "Server is running and ready for data uploads!"
+    }
 
 @app.post("/upload")
 async def upload_streaming_history(files: List[UploadFile] = File(...)):
@@ -300,6 +339,25 @@ def chatbot_query(body: dict = Body(...)):
                 total = total_ms / 1000 / 60
                 return {"response": f"{round(total, 1)} minutes"}
                 
+    finally:
+        session.close()
+
+@app.post("/clear_data")
+def clear_user_data():
+    """Clear all user data from database for privacy"""
+    from database import StreamingHistory, DailyStats
+    session = get_session()
+    try:
+        # Clear all data
+        session.query(StreamingHistory).delete()
+        session.query(DailyStats).delete()
+        session.commit()
+        print("🗑️ User data cleared manually")
+        return {"message": "All data cleared successfully", "success": True}
+    except Exception as e:
+        session.rollback()
+        print(f"❌ Error clearing data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to clear data: {str(e)}")
     finally:
         session.close()
 

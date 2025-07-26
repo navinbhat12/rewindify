@@ -149,6 +149,16 @@ This project now uses **SQLite** with **SQLAlchemy ORM** for efficient data stor
 - **Scalable architecture** ready for production deployment
 - **Optimized data structure** with pre-computed fields
 
+### Privacy & Data Handling:
+
+- **User Control**: "Clear Data" button removes all user data
+- **Automatic Cleanup**: Database cleared when server shuts down
+- **No Persistent Storage**: Data doesn't survive server restarts by default
+- **Privacy-First**: User data is not stored indefinitely
+- **Manual Clearing**: Users can clear data at any time via navbar button
+
+**Note**: This application prioritizes user privacy. Data is stored only during active sessions and is automatically cleared when the server stops. Users can manually clear their data at any time using the "Clear Data" button in the navigation bar.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
