@@ -12,19 +12,19 @@ An interactive dashboard that visualizes your Spotify listening history and prov
 
 ### Initial Upload Page
 
-![Initial Login](InitialLogin.png?v=2)
+![Initial Login](InitialLogin-v2.png)
 
 ### Main Dashboard
 
-![Home Page](HomePage.png?v=2)
+![Home Page](HomePage-v2.png)
 
 ### Track Details Modal
 
-![Track List Modal](TrackListModal.png?v=2)
+![Track List Modal](TrackListModal-v2.png)
 
 ### AI Chatbot
 
-![Chatbot](Chatbot.png?v=2)
+![Chatbot](Chatbot-v2.png)
 
 ## Tech Stack
 

@@ -36,3 +36,4 @@ yarn-error.log*
 # Helper scripts (hidden from main branch)
 .scripts/
 backend/.env.backup
+.vercel
