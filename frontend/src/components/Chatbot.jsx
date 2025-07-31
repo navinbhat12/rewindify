@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./Chatbot.css";
+import { API_BASE_URL } from "../config";
 
 const DUMMY_RESPONSE =
   "I'm a friendly Spotify bot! (This is a dummy response.)";
@@ -89,9 +90,24 @@ const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
         parsed.album = null;
       }*/
 
-      const res = await fetch("http://localhost:8000/chatbot/query", {
+      const sessionId = sessionStorage.getItem("sessionId");
+      if (!sessionId) {
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "bot",
+            text: "Please upload your data first to start chatting.",
+          },
+        ]);
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/chatbot/query`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Session-ID": sessionId,
+        },
         body: JSON.stringify(parsed),
       });
       const data = await res.json();

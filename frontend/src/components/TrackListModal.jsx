@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./TrackListModal.css";
+import { API_BASE_URL } from "../config";
 
 const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
   const [tracks, setTracks] = useState([]);
@@ -9,15 +10,32 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
     const fetchTracks = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:8000/tracks/${date}`);
+        const sessionId = sessionStorage.getItem("sessionId");
+        if (!sessionId) {
+          console.error("No session ID found");
+          setTracks([]);
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(`${API_BASE_URL}/tracks/${date}`, {
+          headers: {
+            "X-Session-ID": sessionId,
+          },
+        });
         const data = await res.json();
 
         const enriched = await Promise.all(
           data.map(async ({ track_name, artist_name, ms_played }) => {
             const imageRes = await fetch(
-              `http://localhost:8000/track_image?track_name=${encodeURIComponent(
+              `${API_BASE_URL}/track_image?track_name=${encodeURIComponent(
                 track_name
-              )}&artist_name=${encodeURIComponent(artist_name)}`
+              )}&artist_name=${encodeURIComponent(artist_name)}`,
+              {
+                headers: {
+                  "X-Session-ID": sessionId,
+                },
+              }
             );
             const imgData = await imageRes.json();
             return {

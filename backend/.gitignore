@@ -35,3 +35,7 @@ ENV/
 *.swp
 *.swo 
 backend/spotify_data.db 
+# Python
+__pycache__/
+venv/
+.env.backup

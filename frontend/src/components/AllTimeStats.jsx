@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./AllTimeStats.css";
+import { API_BASE_URL } from "../config";
 
 const TABS = [
   { key: "artists", label: "Artists" },
@@ -23,7 +24,7 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
         const enriched = await Promise.all(
           data.songs[metrics.songs].map(async (song) => {
             const imageRes = await fetch(
-              `http://localhost:8000/track_image?track_name=${encodeURIComponent(
+              `${API_BASE_URL}/track_image?track_name=${encodeURIComponent(
                 song.name
               )}&artist_name=${encodeURIComponent(song.artist_name || "")}`
             );
@@ -66,7 +67,7 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
         const enriched = await Promise.all(
           data.albums[metrics.albums].map(async (album) => {
             const imageRes = await fetch(
-              `http://localhost:8000/album_image?album_name=${encodeURIComponent(
+              `${API_BASE_URL}/album_image?album_name=${encodeURIComponent(
                 album.name
               )}&artist_name=${encodeURIComponent(album.artist_name || "")}`
             );
@@ -109,7 +110,7 @@ const AllTimeStats = ({ data, metrics, setMetrics }) => {
         const enriched = await Promise.all(
           data.artists[metrics.artists].map(async (artist) => {
             const imageRes = await fetch(
-              `http://localhost:8000/artist_image?artist_name=${encodeURIComponent(
+              `${API_BASE_URL}/artist_image?artist_name=${encodeURIComponent(
                 artist.name
               )}`
             );

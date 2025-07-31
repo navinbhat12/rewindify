@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { API_BASE_URL } from "../config";
 
 function FolderUpload({ onUploadComplete }) {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -7,27 +8,241 @@ function FolderUpload({ onUploadComplete }) {
   const fileInputRef = useRef(null);
 
   const handleFolderSelect = async (files) => {
-    if (!files || files.length === 0) return;
+    console.log("📁 FolderUpload: Starting upload process");
+
+    if (!files || files.length === 0) {
+      console.log("⚠️ No files provided");
+      return;
+    }
+
+    console.log(`📦 FolderUpload: ${files.length} files selected`);
+
+    // Log file details
+    for (let i = 0; i < files.length; i++) {
+      console.log(
+        `📄 File ${i + 1}: ${files[i].name} (${files[i].size} bytes)`
+      );
+    }
+
+    // Filter out system files and non-JSON files
+    const validFiles = Array.from(files).filter((file) => {
+      const fileName = file.name.toLowerCase();
+
+      // Exclude system files
+      if (
+        fileName === ".ds_store" ||
+        fileName === "thumbs.db" ||
+        fileName === "desktop.ini" ||
+        fileName.startsWith("._")
+      ) {
+        console.log(`🚫 Skipping system file: ${file.name}`);
+        return false;
+      }
+
+      // Only include JSON files
+      if (!fileName.endsWith(".json")) {
+        console.log(`🚫 Skipping non-JSON file: ${file.name}`);
+        return false;
+      }
+
+      // Only include audio streaming history (exclude video streaming history)
+      if (!fileName.startsWith("streaming_history_audio")) {
+        console.log(`🚫 Skipping non-audio streaming file: ${file.name}`);
+        return false;
+      }
+
+      return true;
+    });
+
+    if (validFiles.length === 0) {
+      console.log("⚠️ No valid JSON files found after filtering");
+      setIsUploading(false);
+      alert(
+        "No valid Spotify JSON files found. Please make sure you're uploading Spotify streaming history files."
+      );
+      return;
+    }
+
+    console.log(`✅ Filtered to ${validFiles.length} valid JSON files`);
 
     setIsUploading(true);
     setUploadProgress(0);
 
     const formData = new FormData();
-    for (let file of files) {
+    for (let file of validFiles) {
       formData.append("files", file);
     }
+    console.log("📋 FormData created with", validFiles.length, "files");
 
     try {
-      const response = await fetch("http://localhost:8000/upload", {
+      console.log("🆕 Creating session...");
+      // First, create a session
+      const sessionResponse = await fetch(`${API_BASE_URL}/session`, {
         method: "POST",
-        body: formData,
       });
 
-      const data = await response.json();
-      console.log("✅ Received from backend:", data);
-      onUploadComplete(data);
+      if (!sessionResponse.ok) {
+        throw new Error(
+          `Session creation failed: ${sessionResponse.status} ${sessionResponse.statusText}`
+        );
+      }
+
+      const sessionData = await sessionResponse.json();
+      const sessionId = sessionData.session_id;
+
+      console.log("✅ Session created:", sessionId);
+
+      // Store session ID for other components to use
+      sessionStorage.setItem("sessionId", sessionId);
+
+      console.log("📤 Starting chunked file upload...");
+
+      // Split large files (13MB each) into smaller chunks to avoid 10MB Cloud Run limit
+      const MAX_CHUNK_SIZE = 8 * 1024 * 1024; // 8MB per chunk to stay well under 10MB limit
+      const fileArray = Array.from(formData.entries()).filter(
+        ([key]) => key === "files"
+      );
+      const chunks = [];
+
+      console.log(`📁 Processing ${fileArray.length} files for chunking...`);
+
+      // Process each file and split if necessary
+      for (let fileIndex = 0; fileIndex < fileArray.length; fileIndex++) {
+        const [key, file] = fileArray[fileIndex];
+
+        console.log(
+          `📄 File ${fileIndex + 1}: ${file.name} (${(
+            file.size /
+            (1024 * 1024)
+          ).toFixed(1)}MB)`
+        );
+
+        if (file.size <= MAX_CHUNK_SIZE) {
+          // File is small enough, add as single chunk
+          chunks.push([
+            { file, originalName: file.name, chunkIndex: 0, totalChunks: 1 },
+          ]);
+        } else {
+          // File is too large, need to split it
+          const totalChunks = Math.ceil(file.size / MAX_CHUNK_SIZE);
+          console.log(`  ✂️  Splitting into ${totalChunks} chunks`);
+
+          // Read file content and split
+          const fileContent = await file.text();
+          const jsonData = JSON.parse(fileContent);
+
+          const recordsPerChunk = Math.ceil(jsonData.length / totalChunks);
+
+          for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+            const startIdx = chunkIndex * recordsPerChunk;
+            const endIdx = Math.min(
+              startIdx + recordsPerChunk,
+              jsonData.length
+            );
+            const chunkData = jsonData.slice(startIdx, endIdx);
+
+            // Create new file blob for this chunk
+            const chunkBlob = new Blob([JSON.stringify(chunkData)], {
+              type: "application/json",
+            });
+            const chunkFile = new File(
+              [chunkBlob],
+              `${file.name.replace(".json", "")}_chunk${
+                chunkIndex + 1
+              }of${totalChunks}.json`,
+              { type: "application/json" }
+            );
+
+            console.log(
+              `    📦 Chunk ${chunkIndex + 1}/${totalChunks}: ${(
+                chunkFile.size /
+                (1024 * 1024)
+              ).toFixed(1)}MB (${chunkData.length} records)`
+            );
+
+            chunks.push([
+              {
+                file: chunkFile,
+                originalName: file.name,
+                chunkIndex: chunkIndex,
+                totalChunks: totalChunks,
+              },
+            ]);
+          }
+        }
+      }
+
+      console.log(
+        `📦 Created ${chunks.length} upload chunks from ${fileArray.length} original files`
+      );
+
+      let allData = [];
+
+      // Upload chunks sequentially
+      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+        const chunkFiles = chunks[chunkIndex];
+        const chunkFormData = new FormData();
+
+        // Add files from this chunk (now each chunk contains file objects with metadata)
+        chunkFiles.forEach((fileInfo) => {
+          chunkFormData.append("files", fileInfo.file);
+        });
+
+        // Get file info for logging
+        const fileInfo = chunkFiles[0]; // Each chunk should have one file now
+        const displayName =
+          fileInfo.totalChunks > 1
+            ? `${fileInfo.originalName} (part ${fileInfo.chunkIndex + 1}/${
+                fileInfo.totalChunks
+              })`
+            : fileInfo.originalName;
+
+        console.log(
+          `📤 Uploading chunk ${chunkIndex + 1}/${
+            chunks.length
+          }: ${displayName}`
+        );
+
+        const response = await fetch(`${API_BASE_URL}/upload`, {
+          method: "POST",
+          headers: {
+            "X-Session-ID": sessionId,
+            "X-Chunk-Index": chunkIndex.toString(),
+            "X-Total-Chunks": chunks.length.toString(),
+            "X-Original-Filename": fileInfo.originalName,
+            "X-File-Chunk-Index": fileInfo.chunkIndex.toString(),
+            "X-File-Total-Chunks": fileInfo.totalChunks.toString(),
+          },
+          body: chunkFormData,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Chunk ${chunkIndex + 1} upload failed: ${response.status} ${
+              response.statusText
+            }`
+          );
+        }
+
+        const chunkData = await response.json();
+        console.log(
+          `✅ Chunk ${chunkIndex + 1}/${chunks.length} uploaded successfully!`
+        );
+
+        // Accumulate data from all chunks
+        if (chunkData.data) {
+          allData = allData.concat(chunkData.data);
+        }
+      }
+
+      console.log(
+        "✅ All chunks uploaded successfully! Total records:",
+        allData.length
+      );
+      onUploadComplete({ data: allData });
     } catch (err) {
       console.error("❌ Upload failed:", err);
+      console.error("Error details:", err.message);
     } finally {
       setIsUploading(false);
       setUploadProgress(0);

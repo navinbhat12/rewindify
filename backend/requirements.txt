@@ -17,10 +17,14 @@ pytz==2025.2
 requests==2.32.3
 six==1.17.0
 sniffio==1.3.1
-sqlalchemy==2.0.0
+sqlalchemy==2.0.35
 starlette==0.46.2
 typing-inspection==0.4.1
 typing_extensions==4.14.0
 tzdata==2025.2
 urllib3==2.4.0
 uvicorn==0.34.3
+# PostgreSQL adapter for production
+psycopg2-binary==2.9.9
+# Session management (Redis for production, optional)
+redis==5.0.8

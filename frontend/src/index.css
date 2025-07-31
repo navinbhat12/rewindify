@@ -84,6 +84,7 @@ button:focus-visible {
   fill: #3a0080;
 }
 
+
 .react-calendar-heatmap rect {
   rx: 2px;
   ry: 2px;
@@ -114,10 +115,11 @@ button:focus-visible {
 }
 
 .legend-box {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
   border: 1px solid #333;
+  flex-shrink: 0;
 }
 
 /* 🟨 Explicit backgrounds for legend boxes */
@@ -136,3 +138,4 @@ button:focus-visible {
 .legend-box.color-max {
   background-color: #3a0080;
 }
+
