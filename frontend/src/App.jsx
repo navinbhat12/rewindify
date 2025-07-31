@@ -30,6 +30,7 @@ function App() {
   });
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [pendingChatbotMessage, setPendingChatbotMessage] = useState("");
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   // Save data to sessionStorage whenever it changes
   useEffect(() => {
@@ -208,21 +209,78 @@ function App() {
 
               <FolderUpload onUploadComplete={handleUploadComplete} />
 
-              <div className="features">
-                <div className="feature">
-                  <div className="feature-icon">📊</div>
-                  <h3>Interactive Heatmap</h3>
-                  <p>See your daily listening patterns at a glance</p>
+              <div className="features-showcase">
+                <h2>Discover Your Music Journey</h2>
+                <p className="showcase-subtitle">
+                  Explore powerful insights about your listening habits
+                </p>
+
+                <div className="feature-section">
+                  <div className="feature-content">
+                    <div className="feature-text">
+                      <h3>📊 Interactive Dashboard</h3>
+                      <p>
+                        Visualize your Spotify listening data with beautiful
+                        heatmaps and charts. See your daily listening patterns,
+                        track your favorite artists, and discover your
+                        most-played songs all in one place.
+                      </p>
+                    </div>
+                    <div className="feature-image">
+                      <img
+                        src="/HomePage.png"
+                        alt="Dashboard Overview"
+                        onClick={() => setFullscreenImage("/HomePage.png")}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="feature">
-                  <div className="feature-icon">🎵</div>
-                  <h3>Track Details</h3>
-                  <p>Explore what you listened to on any day</p>
+
+                <div className="feature-section">
+                  <div className="feature-content reverse">
+                    <div className="feature-text">
+                      <h3>🎵 Track Details</h3>
+                      <p>
+                        Click on any day to see exactly what you listened to.
+                        Explore your daily playlists, discover forgotten
+                        favorites, and relive your musical moments with detailed
+                        track information.
+                      </p>
+                    </div>
+                    <div className="feature-image">
+                      <img
+                        src="/TrackListModal.png"
+                        alt="Track Details"
+                        onClick={() =>
+                          setFullscreenImage("/TrackListModal.png")
+                        }
+                        style={{ cursor: "pointer" }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="feature">
-                  <div className="feature-icon">🤖</div>
-                  <h3>AI Chatbot</h3>
-                  <p>Ask questions about your music taste</p>
+
+                <div className="feature-section">
+                  <div className="feature-content">
+                    <div className="feature-text">
+                      <h3>🤖 AI Chatbot Assistant</h3>
+                      <p>
+                        Ask questions about your music taste in natural
+                        language. Find your top artists, most-played songs,
+                        listening trends, and get personalized insights about
+                        your Spotify journey.
+                      </p>
+                    </div>
+                    <div className="feature-image">
+                      <img
+                        src="/Chatbot.png"
+                        alt="AI Chatbot"
+                        onClick={() => setFullscreenImage("/Chatbot.png")}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -269,77 +327,168 @@ function App() {
                 font-weight: 400;
               }
 
-              .features {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 2rem;
-                margin-top: 2.5rem;
+              .features-showcase {
+                margin-top: 4rem;
+                max-width: 1200px;
+                margin-left: auto;
+                margin-right: auto;
+                padding: 0 2rem;
               }
 
-              .feature {
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
-                padding: 1.5rem;
-                transition: all 0.3s ease;
+              .features-showcase h2 {
+                font-size: 2.5rem;
+                font-weight: 700;
+                text-align: center;
+                margin-bottom: 0.5rem;
+                background: linear-gradient(135deg, #ffffff 0%, #9146ff 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
               }
 
-              .feature:hover {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: rgba(145, 70, 255, 0.3);
-                transform: translateY(-2px);
-              }
-
-              .feature-icon {
-                font-size: 2rem;
-                margin-bottom: 1rem;
-              }
-
-              .feature h3 {
+              .showcase-subtitle {
+                text-align: center;
+                color: #a0a0a0;
                 font-size: 1.1rem;
+                margin-bottom: 4rem;
+              }
+
+              .feature-section {
+                margin-bottom: 6rem;
+                scroll-margin-top: 2rem;
+              }
+
+              .feature-content {
+                display: flex;
+                align-items: center;
+                gap: 4rem;
+                max-width: 1000px;
+                margin: 0 auto;
+              }
+
+              .feature-content.reverse {
+                flex-direction: row-reverse;
+              }
+
+              .feature-text {
+                flex: 1;
+              }
+
+              .feature-text h3 {
+                font-size: 1.8rem;
                 font-weight: 600;
-                margin: 0 0 0.5rem 0;
+                margin-bottom: 1rem;
                 color: #ffffff;
               }
 
-              .feature p {
-                font-size: 0.9rem;
+              .feature-text p {
+                font-size: 1.1rem;
+                line-height: 1.6;
                 color: #a0a0a0;
                 margin: 0;
-                line-height: 1.4;
               }
 
-              .upload-footer {
-                margin-top: 3rem;
-                padding: 2rem 0;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                width: 100%;
+              .feature-image {
+                flex: 1;
+                display: flex;
+                justify-content: center;
               }
 
-              .upload-footer p {
-                margin: 0;
-                color: #a0a0a0;
-                font-size: 0.9rem;
-                font-weight: 500;
-                text-align: center;
+              .feature-image img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(145, 70, 255, 0.2);
+                transition: transform 0.3s ease;
+                cursor: pointer;
+                user-select: none;
+              }
+
+              .feature-image img:hover {
+                transform: scale(1.02);
               }
 
               @media (max-width: 768px) {
-                .landing-page-content {
-                  padding: 2rem 1rem;
+                .feature-content {
+                  flex-direction: column;
+                  gap: 2rem;
                 }
-                .brand-header h1 {
-                  font-size: 2.5rem;
+
+                .feature-content.reverse {
+                  flex-direction: column;
                 }
-                .features {
-                  grid-template-columns: 1fr;
-                  gap: 1.5rem;
-                  margin-top: 2rem;
+
+                .features-showcase h2 {
+                  font-size: 2rem;
                 }
-                .upload-footer {
-                  margin-top: 2.5rem;
-                  padding: 1.5rem 0;
+
+                .feature-text h3 {
+                  font-size: 1.5rem;
                 }
+              }
+
+              .fullscreen-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.6);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                z-index: 3000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+              }
+
+              @keyframes fadeIn {
+                from {
+                  opacity: 0;
+                }
+                to {
+                  opacity: 1;
+                }
+              }
+
+              .fullscreen-content {
+                position: relative;
+                max-width: 90vw;
+                max-height: 90vh;
+              }
+
+              .fullscreen-content img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+                border-radius: 12px;
+                box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+              }
+
+              .fullscreen-close-btn {
+                position: absolute;
+                top: -40px;
+                right: -40px;
+                background: #2c222c;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+                font-size: 1.5rem;
+                font-weight: 300;
+                cursor: pointer;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+              }
+
+              .fullscreen-close-btn:hover {
+                background: #3a2d3a;
+                transform: scale(1.1);
               }
             `}</style>
           </div>
@@ -534,6 +683,26 @@ function App() {
           </div>
         )}
       </div>
+      {fullscreenImage && (
+        <div
+          className="fullscreen-modal"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div
+            className="fullscreen-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="fullscreen-close-btn"
+              onClick={() => setFullscreenImage(null)}
+              aria-label="Close fullscreen"
+            >
+              &times;
+            </button>
+            <img src={fullscreenImage} alt="Fullscreen view" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

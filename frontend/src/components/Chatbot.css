@@ -45,7 +45,7 @@
 .chatbot-header-modal {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 1rem 1.5rem;
   font-size: 1.2rem;
   font-weight: 600;
@@ -68,6 +68,7 @@
   top: 50%;
   transform: translateY(-50%);
   transition: all 0.3s ease;
+  z-index: 1;
 }
 
 .chatbot-close-btn:hover {

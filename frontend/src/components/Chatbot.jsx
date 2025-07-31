@@ -9,12 +9,7 @@ const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text:
-        "Hey! 👋 Ask me anything about your Spotify stats! For example:\n\n" +
-        "• How many hours did I listen to [Artist]?\n" +
-        "• How many times did I play [Song]?\n" +
-        "• How many hours on [Album]?\n\n" +
-        "Add 'in 2023' to any question for year-specific stats! 🎵",
+      text: "Hi! 👋 I'm your Spotify data assistant. I can show you your top artists, most-played tracks, listening trends, and answer questions about your music taste. Just ask me anything about your Spotify stats! 🎧",
     },
   ]);
   const [input, setInput] = useState("");
@@ -190,18 +185,7 @@ const Chatbot = ({ open, onClose, pendingMessage, onMessageHandled }) => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M11 4L11 18"
-                stroke="white"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M6 9L11 4L16 9"
-                stroke="white"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white" />
             </svg>
           </button>
         </form>
