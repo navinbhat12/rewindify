@@ -2,6 +2,10 @@
 
 An interactive dashboard that visualizes your Spotify listening history and provides an AI-powered chatbot to answer questions about your music habits.
 
+## 🌐 Live Demo
+
+**[Try the Spotify Dashboard →](https://spotify-dashboard-phi.vercel.app/)**
+
 ## Features
 
 - **Interactive Dashboard**: Visualize your Spotify listening data with beautiful heatmaps and charts. See your daily listening patterns, track your favorite artists, and discover your most-played songs all in one place.
