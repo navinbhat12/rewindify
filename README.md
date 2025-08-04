@@ -1,10 +1,10 @@
-# Spotify Dashboard
+# Rewindify
 
 An interactive dashboard that visualizes your Spotify listening history and provides an AI-powered chatbot to answer questions about your music habits.
 
 ## 🌐 Production Deployment
 
-**[Spotify Dashboard →](https://spotify-dashboard-phi.vercel.app/)**
+**[Rewindify →](https://spotify-dashboard-phi.vercel.app/)**
 
 ## Features
 

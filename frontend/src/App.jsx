@@ -203,7 +203,7 @@ function App() {
                     />
                   </svg>
                 </div>
-                <h1>Spotify Dashboard</h1>
+                <h1>Rewindify</h1>
                 <p>Visualize your listening habits with beautiful insights</p>
               </div>
 
