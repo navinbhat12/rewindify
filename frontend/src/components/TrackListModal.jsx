@@ -72,12 +72,12 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
     fetchTracks();
   }, [date]);
 
-  const handleCopyAndQuery = async (trackName) => {
+  const handleCopyAndQuery = async (trackName, artistName) => {
     try {
       await navigator.clipboard.writeText(trackName);
     } catch {}
     if (onChatbotQuery) {
-      onChatbotQuery(`How many times have I listened to the song ${trackName}`);
+      onChatbotQuery(`How many times have I listened to the song titled "${trackName}" by the artist ${artistName}?`);
     }
   };
 
@@ -146,8 +146,8 @@ const TrackListModal = ({ date, onClose, onChatbotQuery }) => {
                       fontSize: "1.2rem",
                       opacity: 0.7,
                     }}
-                    onClick={() => handleCopyAndQuery(track.track_name)}
-                    aria-label={`Ask StatsBot about ${track.track_name}`}
+                    onClick={() => handleCopyAndQuery(track.track_name, track.artist_name)}
+                    aria-label={`Ask StatsBot about ${track.track_name} by ${track.artist_name}`}
                   >
                     <svg
                       width="22"
