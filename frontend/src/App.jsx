@@ -18,7 +18,6 @@ function App() {
     return savedYear || "";
   });
   const [selectedDate, setSelectedDate] = useState(null);
-  const [tracks, setTracks] = useState([]);
   const [allTimeStats, setAllTimeStats] = useState(() => {
     const savedStats = sessionStorage.getItem("allTimeStats");
     return savedStats ? JSON.parse(savedStats) : null;
@@ -135,14 +134,7 @@ function App() {
   const handleDateClick = async (value) => {
     if (!value) return;
     setSelectedDate(value.date);
-    try {
-      const res = await fetch(`${API_BASE_URL}/tracks/${value.date}`);
-      const data = await res.json();
-      setTracks(data);
-    } catch (err) {
-      console.error("Failed to fetch tracks:", err);
-      setTracks([]);
-    }
+    // TrackListModal will handle fetching tracks for this date
   };
 
   const filteredData = data.filter(
@@ -218,7 +210,7 @@ function App() {
                 <div className="feature-section">
                   <div className="feature-content">
                     <div className="feature-text">
-                      <h3>📊 Interactive Dashboard</h3>
+                      <h3>Interactive Dashboard</h3>
                       <p>
                         Visualize your Spotify listening data with beautiful
                         heatmaps and charts. See your daily listening patterns,
@@ -240,7 +232,7 @@ function App() {
                 <div className="feature-section">
                   <div className="feature-content reverse">
                     <div className="feature-text">
-                      <h3>🎵 Track Details</h3>
+                      <h3>Track Details</h3>
                       <p>
                         Click on any day to see exactly what you listened to.
                         Explore your daily playlists, discover forgotten
@@ -264,7 +256,7 @@ function App() {
                 <div className="feature-section">
                   <div className="feature-content">
                     <div className="feature-text">
-                      <h3>🤖 AI Chatbot Assistant</h3>
+                      <h3>AI Chatbot Assistant</h3>
                       <p>
                         Ask questions about your music taste in natural
                         language. Find your top artists, most-played songs,
@@ -658,7 +650,6 @@ function App() {
               {selectedDate && (
                 <TrackListModal
                   date={selectedDate}
-                  tracks={tracks}
                   onClose={() => setSelectedDate(null)}
                   onChatbotQuery={(msg) => {
                     setPendingChatbotMessage(msg);
