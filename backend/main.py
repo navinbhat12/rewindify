@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Body, HTTPException, Depends, BackgroundTasks, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.middleware.base import BaseHTTPMiddleware
 
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -86,14 +87,25 @@ if os.getenv('DEBUG_CORS') == 'true':
     cors_origins = ["*"]
     print("🚨 DEBUG: Using wildcard CORS origins")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Force wildcard for immediate fix
-    allow_credentials=False,  # Must be False when using wildcard
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["X-Session-ID"]
-)
+# Custom CORS middleware to ensure it works
+class CustomCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Handle preflight requests
+        if request.method == "OPTIONS":
+            response = JSONResponse(content={})
+        else:
+            response = await call_next(request)
+        
+        # Add CORS headers
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Expose-Headers"] = "X-Session-ID"
+        # Note: No Access-Control-Allow-Credentials header when using wildcard
+        
+        return response
+
+app.add_middleware(CustomCORSMiddleware)
 
 # Initialize database on startup
 init_database()
