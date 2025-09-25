@@ -4,7 +4,7 @@ An interactive dashboard that visualizes your Spotify listening history and prov
 
 ## 🌐 Production Deployment
 
-**[Rewindify →](https://spotify-dashboard-phi.vercel.app/)**
+**[Rewindify →](https://rewindify-dashboard.vercel.app/)**
 
 ## Features
 
