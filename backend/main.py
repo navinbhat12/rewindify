@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Body, HTTPException, Depends, BackgroundTasks, Request, Header
+from fastapi import FastAPI, UploadFile, File, Body, HTTPException, Depends, BackgroundTasks, Request, Header, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.base import BaseHTTPMiddleware
 
@@ -106,7 +106,10 @@ init_database()
 
 # Test endpoint to verify CORS middleware
 @app.get("/test-cors")
-def test_cors():
+def test_cors(response: Response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
     return {"message": "CORS test endpoint", "timestamp": datetime.utcnow().isoformat()}
 
 # Session dependency
@@ -202,9 +205,15 @@ def welcome():
     }
 
 @app.post("/session")
-def create_session():
+def create_session(response: Response):
     """Create a new user session"""
     print("🆕 Session creation request received")
+    
+    # Add CORS headers directly
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
     try:
         session_id = session_manager.create_session()
         print(f"✅ Session created: {session_id[:8]}...")
