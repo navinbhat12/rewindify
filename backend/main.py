@@ -78,7 +78,7 @@ def get_cors_origins():
 cors_origins = get_cors_origins()
 
 # TEMPORARY FIX: Force wildcard CORS for debugging
-print("🚨 TEMPORARY FIX: Using wildcard CORS origins")
+print("🚨 TEMPORARY FIX: Using wildcard CORS origins - FORCE DEPLOY")
 cors_origins = ["*"]
 
 # Add wildcard for debugging if needed
