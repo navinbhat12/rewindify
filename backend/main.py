@@ -46,7 +46,10 @@ app = FastAPI(
 # CORS Configuration - Production ready
 def get_cors_origins():
     """Get CORS origins based on environment"""
-    if os.getenv('ENVIRONMENT') == 'production':
+    environment = os.getenv('ENVIRONMENT', 'development')
+    print(f"🌍 Environment: {environment}")
+    
+    if environment == 'production':
         # Production origins - Vercel domains
         allowed_origins = [
             "https://rewindify-dashboard.vercel.app",
@@ -62,16 +65,26 @@ def get_cors_origins():
         return allowed_origins
     else:
         # Development origins
-        return [
+        dev_origins = [
             "http://localhost:5173",
             "http://localhost:5174",
             "http://127.0.0.1:5173", 
             "http://127.0.0.1:5174"
         ]
+        print(f"🔗 CORS Origins (Development): {dev_origins}")
+        return dev_origins
+
+# Get CORS origins
+cors_origins = get_cors_origins()
+
+# Add wildcard for debugging if needed
+if os.getenv('DEBUG_CORS') == 'true':
+    cors_origins = ["*"]
+    print("🚨 DEBUG: Using wildcard CORS origins")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=get_cors_origins(),
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
