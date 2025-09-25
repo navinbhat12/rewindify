@@ -1,5 +1,4 @@
 from fastapi import FastAPI, UploadFile, File, Body, HTTPException, Depends, BackgroundTasks, Request, Header
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.middleware.base import BaseHTTPMiddleware
 
@@ -75,28 +74,23 @@ def get_cors_origins():
         print(f"🔗 CORS Origins (Development): {dev_origins}")
         return dev_origins
 
-# Get CORS origins
-cors_origins = get_cors_origins()
-
-# TEMPORARY FIX: Force wildcard CORS for debugging
-print("🚨 TEMPORARY FIX: Using wildcard CORS origins - FORCE DEPLOY")
-cors_origins = ["*"]
-
-# Add wildcard for debugging if needed
-if os.getenv('DEBUG_CORS') == 'true':
-    cors_origins = ["*"]
-    print("🚨 DEBUG: Using wildcard CORS origins")
+# CORS is now handled by CustomCORSMiddleware below
+print("🚨 Using Custom CORS Middleware - No FastAPI CORS middleware")
 
 # Custom CORS middleware to ensure it works
 class CustomCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        print(f"🚨 Custom CORS Middleware called for {request.method} {request.url}")
+        
         # Handle preflight requests
         if request.method == "OPTIONS":
+            print("🚨 Handling OPTIONS preflight request")
             response = JSONResponse(content={})
         else:
             response = await call_next(request)
         
         # Add CORS headers
+        print("🚨 Adding CORS headers")
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "*"
@@ -109,6 +103,11 @@ app.add_middleware(CustomCORSMiddleware)
 
 # Initialize database on startup
 init_database()
+
+# Test endpoint to verify CORS middleware
+@app.get("/test-cors")
+def test_cors():
+    return {"message": "CORS test endpoint", "timestamp": datetime.utcnow().isoformat()}
 
 # Session dependency
 def get_session_id(x_session_id: Optional[str] = Header(None)) -> str:
