@@ -49,6 +49,7 @@ def get_cors_origins():
     if os.getenv('ENVIRONMENT') == 'production':
         # Production origins - Vercel domains
         allowed_origins = [
+            "https://rewindify-dashboard.vercel.app",
             "https://spotify-dashboard-phi.vercel.app",
             "https://spotify-dashboard-6li0m9o7b-navin-bhats-projects.vercel.app",
             "https://spotify-dashboard-671jpjnrv-navin-bhats-projects.vercel.app",
